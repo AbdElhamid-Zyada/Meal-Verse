@@ -25,13 +25,14 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Simple navigation to home for demo purposes
+        // Navigation triggers
         view.findViewById(R.id.btn_login).setOnClickListener(
                 v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_homeFragment));
 
         view.findViewById(R.id.btn_guest).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_homeFragment));
+                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_guestFragment));
 
-
+        view.findViewById(R.id.tv_signup_prompt).setOnClickListener(
+                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_signupFragment));
     }
 }
