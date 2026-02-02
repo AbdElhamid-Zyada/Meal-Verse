@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.MealPlanner" parent="Base.Theme.MealPlanner" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/mealverse_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.MealPlanner</item>
+    </style>
 </resources>
