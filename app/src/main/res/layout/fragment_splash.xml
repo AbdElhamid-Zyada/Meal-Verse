@@ -4,31 +4,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/background_light"
     tools:context=".ui.splash.SplashFragment">
 
-    <ImageView
-        android:id="@+id/iv_logo"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src="@drawable/mealverse_logo"
+    <!-- Central Logo/Visual Container -->
+    <FrameLayout
+        android:id="@+id/logo_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45" />
+        app:layout_constraintVertical_chainStyle="packed">
 
-    <TextView
-        android:id="@+id/tv_app_name"
+        <!-- Decorative background shapes (Simulated with a Circle) -->
+        <View
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:alpha="0.1" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="60dp"
+            app:cardElevation="8dp">
+
+            <ImageView
+                android:id="@+id/iv_logo"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_restaurant_menu"
+                app:tint="@color/primary" />
+        </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
+
+    <!-- App Name Branding Section -->
+    <LinearLayout
+        android:id="@+id/brand_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="MealVerse"
-        android:textColor="#2D5A27"
-        android:textSize="32sp"
-        android:textStyle="bold"
+        android:layout_marginBottom="100dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/iv_logo" />
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_app_name_splash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="-0.02"
+            android:text="MealVerse"
+            android:textColor="@color/text_primary"
+            android:textSize="36sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:alpha="0.4"
+            android:fontFamily="sans-serif-medium"
+            android:text="Plan. Cook. Enjoy."
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Footer Dots -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

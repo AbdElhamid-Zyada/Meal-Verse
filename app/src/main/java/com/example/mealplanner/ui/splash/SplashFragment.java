@@ -27,11 +27,12 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Navigate to home after 2 seconds
+        // Navigate to home after 2.5 seconds
+        view.findViewById(R.id.iv_logo).animate().rotation(360f).setDuration(1000).start();
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
                 Navigation.findNavController(view).navigate(R.id.action_splashFragment_to_homeFragment);
             }
-        }, 2000);
+        }, 2500);
     }
 }
