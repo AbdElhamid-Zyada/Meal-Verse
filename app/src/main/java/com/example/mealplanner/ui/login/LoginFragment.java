@@ -1,8 +1,6 @@
-package com.example.mealplanner.ui.splash;
+package com.example.mealplanner.ui.login;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,25 +12,26 @@ import androidx.navigation.Navigation;
 
 import com.example.mealplanner.R;
 
-public class SplashFragment extends Fragment {
+public class LoginFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_splash, container, false);
+        return inflater.inflate(R.layout.fragment_login, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Navigate to home after 2.5 seconds
-        view.findViewById(R.id.iv_logo).animate().rotation(360f).setDuration(1000).start();
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (isAdded()) {
-                Navigation.findNavController(view).navigate(R.id.action_splashFragment_to_loginFragment);
-            }
-        }, 2500);
+        // Simple navigation to home for demo purposes
+        view.findViewById(R.id.btn_login).setOnClickListener(
+                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_homeFragment));
+
+        view.findViewById(R.id.btn_guest).setOnClickListener(
+                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_homeFragment));
+
+
     }
 }
