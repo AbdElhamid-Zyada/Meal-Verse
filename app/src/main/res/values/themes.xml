@@ -7,6 +7,10 @@
 
     <style name="Theme.MealPlanner" parent="Base.Theme.MealPlanner" />
 
+    <style name="CircleImage" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/background_light</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_transparent</item>
