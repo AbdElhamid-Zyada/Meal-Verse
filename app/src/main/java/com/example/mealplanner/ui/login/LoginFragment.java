@@ -12,27 +12,43 @@ import androidx.navigation.Navigation;
 
 import com.example.mealplanner.R;
 
-public class LoginFragment extends Fragment {
+public class LoginFragment extends Fragment implements LoginContract.View {
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_login, container, false);
-    }
+        private LoginContract.Presenter presenter;
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                        @Nullable Bundle savedInstanceState) {
+                return inflater.inflate(R.layout.fragment_login, container, false);
+        }
 
-        // Navigation triggers
-        view.findViewById(R.id.btn_login).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_homeFragment));
+        @Override
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+                super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.btn_guest).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_guestFragment));
+                presenter = new LoginPresenter(this);
 
-        view.findViewById(R.id.tv_signup_prompt).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_signupFragment));
-    }
+                // Navigation triggers
+                view.findViewById(R.id.btn_login).setOnClickListener(v -> presenter.onLoginClicked(v));
+
+                view.findViewById(R.id.btn_guest).setOnClickListener(v -> presenter.onGuestClicked(v));
+
+                view.findViewById(R.id.tv_signup_prompt).setOnClickListener(v -> presenter.onSignupPromptClicked(v));
+        }
+
+        @Override
+        public void navigateToHome(View view) {
+                Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_homeFragment);
+        }
+
+        @Override
+        public void navigateToGuest(View view) {
+                Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_guestFragment);
+        }
+
+        @Override
+        public void navigateToSignup(View view) {
+                Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_signupFragment);
+        }
 }

@@ -12,11 +12,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
         <!-- Search Bar Section -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_search"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_margin="16dp"
+            app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
             app:strokeWidth="0dp">
@@ -36,26 +39,18 @@
                     app:tint="@color/primary_dark" />
 
                 <EditText
+                    android:id="@+id/et_search"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_toEndOf="@id/iv_search_icon"
-                    android:layout_toStartOf="@+id/btn_filter"
                     android:background="@android:color/transparent"
-                    android:hint="Search for recipes or ingredients..."
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:hint="Search cuisines or ingredients..."
                     android:paddingHorizontal="12dp"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
-
-                <ImageButton
-                    android:id="@+id/btn_filter"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="4dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_tune"
-                    app:tint="@color/primary_dark" />
             </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -75,6 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:layout_margin="16dp"
+            app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="20dp"
             app:cardElevation="4dp"
             app:strokeWidth="0dp">
@@ -99,11 +95,11 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|start"
                     android:layout_margin="16dp"
-                    android:background="@drawable/bg_tag"
+                    android:background="#00D261"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="4dp"
                     android:text="MEAL OF THE DAY"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/white"
                     android:textSize="10sp"
                     android:textStyle="bold" />
 
@@ -140,13 +136,14 @@
                 </LinearLayout>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/btn_next_meal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|end"
                     android:layout_margin="16dp"
-                    android:src="@android:drawable/ic_media_play"
-                    app:backgroundTint="@color/primary"
-                    app:fabSize="mini"
+                    android:src="@drawable/ic_chevron_right"
+                    app:backgroundTint="#00D261"
+                    app:fabSize="normal"
                     app:tint="@color/text_primary" />
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -170,35 +167,156 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_see_all_countries"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="See All"
-                android:textColor="@color/primary_dark"
+                android:textColor="#00D261"
                 android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <HorizontalScrollView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:clipToPadding="false"
+            android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:scrollbars="none">
+            android:paddingBottom="12dp"
+            android:weightSum="4">
+            
+            <LinearLayout
+                android:id="@+id/country_container_1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/gray_200">
+                    <ImageView
+                        android:tag="country_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_launcher_background" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:tag="country_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Italian"
+                    android:textColor="@color/gray_800"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/layout_countries"
-                android:layout_width="wrap_content"
+                android:id="@+id/country_container_2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="12dp">
-                <!-- Example Country Item -->
-                <include layout="@layout/item_nav_circle" />
-                <include layout="@layout/item_nav_circle" />
-                <include layout="@layout/item_nav_circle" />
-                <include layout="@layout/item_nav_circle" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/gray_200">
+                    <ImageView
+                        android:tag="country_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_launcher_background" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:tag="country_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Mexican"
+                    android:textColor="@color/gray_800"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-        </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/country_container_3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/gray_200">
+                    <ImageView
+                        android:tag="country_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_launcher_background" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:tag="country_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Japanese"
+                    android:textColor="@color/gray_800"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/country_container_4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/gray_200">
+                    <ImageView
+                        android:tag="country_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_launcher_background" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:tag="country_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Indian"
+                    android:textColor="@color/gray_800"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- Ingredients Section -->
         <LinearLayout
@@ -219,35 +337,165 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_browse_all_ingredients"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Browse All"
-                android:textColor="@color/primary_dark"
+                android:textColor="#00D261"
                 android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <HorizontalScrollView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:clipToPadding="false"
+            android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:scrollbars="none">
+            android:paddingBottom="16dp"
+            android:weightSum="4">
+            
+            <!-- Chicken -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ingredient_container_1"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+                    <ImageView
+                        android:tag="ingredient_image"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_restaurant_menu"
+                        app:tint="@color/primary_dark" />
+                    <TextView
+                        android:tag="ingredient_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Chicken"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:id="@+id/layout_ingredients"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="16dp">
-                <!-- Example Ingredient Chip -->
-                <include layout="@layout/item_nav_pill" />
-                <include layout="@layout/item_nav_pill" />
-                <include layout="@layout/item_nav_pill" />
-                <include layout="@layout/item_nav_pill" />
-            </LinearLayout>
-        </HorizontalScrollView>
+            <!-- Beef -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ingredient_container_2"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+                    <ImageView
+                        android:tag="ingredient_image"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_restaurant_menu"
+                        app:tint="@color/primary_dark" />
+                    <TextView
+                        android:tag="ingredient_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Beef"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Seafood -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ingredient_container_3"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+                    <ImageView
+                        android:tag="ingredient_image"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_restaurant_menu"
+                        app:tint="@color/primary_dark" />
+                    <TextView
+                        android:tag="ingredient_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Seafood"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Veggie -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ingredient_container_4"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+                    <ImageView
+                        android:tag="ingredient_image"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_restaurant_menu"
+                        app:tint="@color/primary_dark" />
+                    <TextView
+                        android:tag="ingredient_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Veggie"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Suggested Section -->
         <TextView
@@ -268,8 +516,12 @@
             android:paddingHorizontal="16dp"
             android:paddingTop="12dp">
             <!-- Example Suggested Items -->
-            <include layout="@layout/item_recipe_horizontal" />
-            <include layout="@layout/item_recipe_horizontal" />
+            <include 
+                android:id="@+id/suggested_meal_1"
+                layout="@layout/item_recipe_horizontal" />
+            <include 
+                android:id="@+id/suggested_meal_2"
+                layout="@layout/item_recipe_horizontal" />
         </LinearLayout>
 
     </LinearLayout>

@@ -19,6 +19,7 @@
             android:id="@+id/card_hero"
             android:layout_width="0dp"
             android:layout_height="250dp"
+            app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"

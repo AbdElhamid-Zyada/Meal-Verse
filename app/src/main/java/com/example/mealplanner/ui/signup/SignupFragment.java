@@ -12,7 +12,9 @@ import androidx.navigation.Navigation;
 
 import com.example.mealplanner.R;
 
-public class SignupFragment extends Fragment {
+public class SignupFragment extends Fragment implements SignupContract.View {
+
+    private SignupContract.Presenter presenter;
 
     @Nullable
     @Override
@@ -25,10 +27,20 @@ public class SignupFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        presenter = new SignupPresenter(this);
 
-        view.findViewById(R.id.tv_login_prompt).setOnClickListener(v -> requireActivity().onBackPressed());
+        view.findViewById(R.id.tv_login_prompt).setOnClickListener(v -> presenter.onLoginPromptClicked());
 
-        view.findViewById(R.id.btn_signup).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_signupFragment_to_homeFragment));
+        view.findViewById(R.id.btn_signup).setOnClickListener(v -> presenter.onSignupClicked(v));
+    }
+
+    @Override
+    public void navigateToHome(View view) {
+        Navigation.findNavController(view).navigate(R.id.action_signupFragment_to_homeFragment);
+    }
+
+    @Override
+    public void navigateBack() {
+        requireActivity().onBackPressed();
     }
 }
