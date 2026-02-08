@@ -1,5 +1,7 @@
 package com.example.mealplanner.repository;
 
+import com.example.mealplanner.model.Country;
+import com.example.mealplanner.model.Ingredient;
 import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.model.MealType;
 
@@ -25,5 +27,14 @@ public interface MealRepository {
     Completable removeFavorite(Meal meal);
 
     Single<Boolean> isFavorite(String mealId);
-    // Add other methods as needed for planning meals
+
+    // Ingredients methods
+    Observable<List<Ingredient>> getIngredients();
+
+    Observable<List<Ingredient>> searchIngredients(String query);
+
+    // Countries methods
+    Observable<List<Country>> getCountries();
+
+    Observable<List<Country>> searchCountries(String query);
 }

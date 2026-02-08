@@ -4,6 +4,8 @@ import android.content.Context;
 import com.example.mealplanner.R;
 import com.example.mealplanner.db.MealDao;
 import com.example.mealplanner.db.MealDatabase;
+import com.example.mealplanner.model.Country;
+import com.example.mealplanner.model.Ingredient;
 import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.model.MealType;
 
@@ -105,5 +107,78 @@ public class MealRepositoryImpl implements MealRepository {
     @Override
     public Single<Boolean> isFavorite(String mealId) {
         return mealDao.isFavorite(mealId);
+    }
+
+    // Ingredients Implementation (Mock)
+    @Override
+    public Observable<List<Ingredient>> getIngredients() {
+        return Observable.fromCallable(this::getMockIngredients);
+    }
+
+    @Override
+    public Observable<List<Ingredient>> searchIngredients(String query) {
+        return Observable.fromCallable(() -> {
+            List<Ingredient> all = getMockIngredients();
+            List<Ingredient> filtered = new java.util.ArrayList<>();
+            for (Ingredient ingredient : all) {
+                if (ingredient.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filtered.add(ingredient);
+                }
+            }
+            return filtered;
+        });
+    }
+
+    private List<Ingredient> getMockIngredients() {
+        List<Ingredient> ingredients = new java.util.ArrayList<>();
+        ingredients.add(new Ingredient("Chicken", R.drawable.ic_launcher_background)); // Replace with proper icons if
+                                                                                       // available
+        ingredients.add(new Ingredient("Beef", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Salmon", R.drawable.ic_launcher_background)); // Assuming generic/placeholder
+        ingredients.add(new Ingredient("Lamb", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Eggplant", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Rice", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Mixed Veg", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Seafood", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Pork", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Pasta", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Tofu", R.drawable.ic_launcher_background));
+        ingredients.add(new Ingredient("Potato", R.drawable.ic_launcher_background));
+        return ingredients;
+    }
+
+    // Countries Implementation (Mock)
+    @Override
+    public Observable<List<Country>> getCountries() {
+        return Observable.fromCallable(this::getMockCountries);
+    }
+
+    @Override
+    public Observable<List<Country>> searchCountries(String query) {
+        return Observable.fromCallable(() -> {
+            List<Country> all = getMockCountries();
+            List<Country> filtered = new java.util.ArrayList<>();
+            for (Country country : all) {
+                if (country.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filtered.add(country);
+                }
+            }
+            return filtered;
+        });
+    }
+
+    private List<Country> getMockCountries() {
+        List<Country> countries = new java.util.ArrayList<>();
+        countries.add(new Country("Italian", R.drawable.ic_launcher_background));
+        countries.add(new Country("Mexican", R.drawable.ic_launcher_background));
+        countries.add(new Country("Japanese", R.drawable.ic_launcher_background));
+        countries.add(new Country("Indian", R.drawable.ic_launcher_background));
+        countries.add(new Country("American", R.drawable.ic_launcher_background));
+        countries.add(new Country("French", R.drawable.ic_launcher_background));
+        countries.add(new Country("British", R.drawable.ic_launcher_background));
+        countries.add(new Country("Chinese", R.drawable.ic_launcher_background));
+        countries.add(new Country("Thai", R.drawable.ic_launcher_background));
+        countries.add(new Country("Spanish", R.drawable.ic_launcher_background));
+        return countries;
     }
 }
