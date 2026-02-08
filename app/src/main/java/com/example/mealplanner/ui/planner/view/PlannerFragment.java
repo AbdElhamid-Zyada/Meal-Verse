@@ -104,6 +104,7 @@ public class PlannerFragment extends Fragment implements PlannerContract.View {
         ivImage.setImageResource(meal.getImageResId());
 
         btnDelete.setOnClickListener(v -> presenter.deleteMeal(type));
+        mealView.setOnClickListener(v -> presenter.onMealClicked(meal));
 
         getContainerForType(type).removeAllViews();
         getContainerForType(type).addView(mealView);
@@ -138,6 +139,14 @@ public class PlannerFragment extends Fragment implements PlannerContract.View {
     @Override
     public void showMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void navigateToMealDetails(String mealId) {
+        Bundle args = new Bundle();
+        args.putString("ARG_MEAL_ID", mealId);
+        androidx.navigation.Navigation.findNavController(requireView())
+                .navigate(R.id.action_plannerFragment_to_mealDetailsFragment, args);
     }
 
     // Inner Adapter Class for Calendar

@@ -57,6 +57,11 @@ public class SavedMealsPresenter implements SavedMealsContract.Presenter {
     }
 
     @Override
+    public void onMealClicked(Meal meal) {
+        view.navigateToMealDetails(meal.getId());
+    }
+
+    @Override
     public void dispose() {
         if (disposables != null && !disposables.isDisposed()) {
             disposables.dispose();

@@ -89,4 +89,9 @@ public class PlannerPresenter implements PlannerContract.Presenter {
         // Refresh
         loadMealsForDate(selectedDate);
     }
+
+    @Override
+    public void onMealClicked(Meal meal) {
+        view.navigateToMealDetails(meal.getId());
+    }
 }

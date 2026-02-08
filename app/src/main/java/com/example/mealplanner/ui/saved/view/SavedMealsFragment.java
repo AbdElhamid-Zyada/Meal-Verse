@@ -85,6 +85,14 @@ public class SavedMealsFragment extends Fragment implements SavedMealsContract.V
         // Hide loading
     }
 
+    @Override
+    public void navigateToMealDetails(String mealId) {
+        Bundle args = new Bundle();
+        args.putString("ARG_MEAL_ID", mealId);
+        androidx.navigation.Navigation.findNavController(requireView())
+                .navigate(R.id.action_savedMealsFragment_to_mealDetailsFragment, args);
+    }
+
     private class SavedMealsAdapter extends RecyclerView.Adapter<SavedMealsAdapter.ViewHolder> {
         private List<Meal> meals = new ArrayList<>();
 
@@ -124,6 +132,8 @@ public class SavedMealsFragment extends Fragment implements SavedMealsContract.V
                 holder.ivFavorite.setImageResource(R.drawable.ic_favorite_border);
                 presenter.removeMeal(meal);
             });
+
+            holder.itemView.setOnClickListener(v -> presenter.onMealClicked(meal));
         }
 
         @Override

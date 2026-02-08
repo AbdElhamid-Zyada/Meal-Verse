@@ -20,6 +20,8 @@ public interface PlannerContract {
         void showEmptySlot(MealType type);
 
         void showMessage(String message);
+
+        void navigateToMealDetails(String mealId);
     }
 
     interface Presenter {
@@ -28,6 +30,8 @@ public interface PlannerContract {
         void selectDate(Date date);
 
         void deleteMeal(MealType type);
+
+        void onMealClicked(Meal meal);
 
         void onViewResumed();
     }

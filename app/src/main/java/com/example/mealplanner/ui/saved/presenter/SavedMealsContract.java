@@ -14,12 +14,16 @@ public interface SavedMealsContract {
         void showLoading();
 
         void hideLoading();
+
+        void navigateToMealDetails(String mealId);
     }
 
     interface Presenter {
         void loadSavedMeals();
 
         void removeMeal(Meal meal);
+
+        void onMealClicked(Meal meal);
 
         void dispose();
     }
