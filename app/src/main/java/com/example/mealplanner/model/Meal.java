@@ -1,8 +1,13 @@
 package com.example.mealplanner.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
+@Entity(tableName = "meals")
 public class Meal implements Serializable {
+    @PrimaryKey
+    @androidx.annotation.NonNull
     private String id;
     private String name;
     private int imageResId; // Using resource ID for mock data, normally would be URL

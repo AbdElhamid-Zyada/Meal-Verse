@@ -1,38 +1,54 @@
 package com.example.mealplanner.repository;
 
+import android.content.Context;
 import com.example.mealplanner.R;
+import com.example.mealplanner.db.MealDao;
+import com.example.mealplanner.db.MealDatabase;
 import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.model.MealType;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 
 public class MealRepositoryImpl implements MealRepository {
 
     private static MealRepositoryImpl instance;
-    // Mock database: Map<DateString, Map<MealType, Meal>>
+
+    // Mock database for planner: Map<DateString, Map<MealType, Meal>>
     private Map<String, Map<MealType, Meal>> plannedMeals;
 
-    private MealRepositoryImpl() {
+    // Room database for favorites
+    private MealDao mealDao;
+
+    private MealRepositoryImpl(Context context) {
+        MealDatabase db = MealDatabase.getInstance(context);
+        mealDao = db.mealDao();
         plannedMeals = new HashMap<>();
-        // Seed some data
         seedData();
+    }
+
+    public static void init(Context context) {
+        if (instance == null) {
+            instance = new MealRepositoryImpl(context);
+        }
     }
 
     public static MealRepositoryImpl getInstance() {
         if (instance == null) {
-            instance = new MealRepositoryImpl();
+            throw new IllegalStateException("MealRepositoryImpl must be initialized with context first");
         }
         return instance;
     }
 
     private void seedData() {
-        // Simplified: Just putting meals for "today" effectively
-        // In a real app, we'd use proper date keys.
-        // For MVP demo, let's assume we return the same meals for every day unless
-        // modified
-        // This is a simplification.
+        // Simplified: Just putting meals for "today" effectively for the Planner mock
+        // part
     }
 
     @Override
@@ -66,8 +82,28 @@ public class MealRepositoryImpl implements MealRepository {
     }
 
     private String getDateKey(Date date) {
-        // Simple key format: yyyy-MM-dd
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
         return sdf.format(date);
+    }
+
+    // RxJava Implementations
+    @Override
+    public Observable<List<Meal>> getFavoriteMeals() {
+        return mealDao.getAllMeals();
+    }
+
+    @Override
+    public Completable addFavorite(Meal meal) {
+        return mealDao.insertMeal(meal);
+    }
+
+    @Override
+    public Completable removeFavorite(Meal meal) {
+        return mealDao.deleteMeal(meal);
+    }
+
+    @Override
+    public Single<Boolean> isFavorite(String mealId) {
+        return mealDao.isFavorite(mealId);
     }
 }

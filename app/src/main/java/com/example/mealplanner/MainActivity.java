@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        com.example.mealplanner.repository.MealRepositoryImpl.init(this);
+
         presenter = new MainPresenter(this);
         bottomNav = findViewById(R.id.bottom_nav_card);
         View mainView = findViewById(R.id.main);
