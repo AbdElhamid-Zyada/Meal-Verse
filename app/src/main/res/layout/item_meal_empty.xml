@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#B2DFDB"
+    app:cardBackgroundColor="#F0FAF5">
+
+    <!-- Note: To make it dashed/dotted, we usually need a custom drawable background.
+         For MVP, a solid light green stroke is acceptable or I can create a shape drawable with dashGap later.
+         I'll stick to a simple stroke for now to save complexity, but keeping the colors right. -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_add"
+            app:tint="#00D261" />
+
+        <TextView
+            android:id="@+id/tv_plan_meal_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="PLAN MEAL"
+            android:textColor="#3D3D3D"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textAllCaps="true"/>
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

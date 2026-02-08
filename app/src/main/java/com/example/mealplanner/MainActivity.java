@@ -100,7 +100,18 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             for (int i = 0; i < layout.getChildCount(); i++) {
                 View child = layout.getChildAt(i);
                 if (child instanceof android.widget.ImageView) {
-                    ((android.widget.ImageView) child).setColorFilter(color);
+                    android.widget.ImageView icon = (android.widget.ImageView) child;
+                    icon.setColorFilter(color);
+
+                    // Special handling for Planner icon to switch between filled and outline
+                    if (itemId == R.id.nav_planner) {
+                        icon.setImageResource(isSelected ? R.drawable.ic_calendar_filled : R.drawable.ic_calendar);
+                        // Reset tint for filled icon if needed, or keep it.
+                        // If ic_calendar_filled is already colored or we want to tint it 'activeColor'.
+                        // activeColor is primary.
+                        icon.setColorFilter(color);
+                    }
+
                 } else if (child instanceof android.widget.TextView) {
                     ((android.widget.TextView) child).setTextColor(color);
                     ((android.widget.TextView) child).setTypeface(null,
