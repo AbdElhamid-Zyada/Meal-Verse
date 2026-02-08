@@ -1,6 +1,7 @@
 package com.example.mealplanner.repository;
 
 import com.example.mealplanner.model.Country;
+import com.example.mealplanner.model.FilterType;
 import com.example.mealplanner.model.Ingredient;
 import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.model.MealType;
@@ -37,4 +38,11 @@ public interface MealRepository {
     Observable<List<Country>> getCountries();
 
     Observable<List<Country>> searchCountries(String query);
+
+    // Search & Filter methods
+    Observable<List<Meal>> searchMeals(String query, String category, String area, String ingredient);
+
+    Observable<List<String>> getFilterOptions(FilterType type);
+
+    Completable addMealToPlan(Meal meal, Date date, MealType type);
 }

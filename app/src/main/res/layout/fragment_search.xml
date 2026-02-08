@@ -1,12 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:background="@color/background_light"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header / Nav -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+        
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_chevron_right"
+            android:rotation="180"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/black"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Explore Meals"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <!-- Search Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                app:tint="@color/green_primary" />
+
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:background="@android:color/transparent"
+                android:hint="Search by name or ingredient..."
+                android:inputType="text"
+                android:maxLines="1"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Filters Row -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_filter_category"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Category"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/ic_chevron_right"
+                app:iconGravity="end"
+                app:iconTint="@color/black"
+                app:iconSize="16dp"
+                app:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:elevation="2dp"
+                app:cornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Button.Icon"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_filter_area"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Area"
+                android:layout_marginEnd="8dp"
+                app:icon="@drawable/ic_chevron_right"
+                app:iconGravity="end"
+                app:iconTint="@color/black"
+                app:iconSize="16dp"
+                app:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:elevation="2dp"
+                app:cornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Button.Icon"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_filter_ingredient"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Main Ingredient"
+                app:icon="@drawable/ic_chevron_right"
+                app:iconGravity="end"
+                app:iconTint="@color/black"
+                app:iconSize="16dp"
+                app:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:elevation="2dp"
+                app:cornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Button.Icon"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Active Chips & Clear All -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="16dp">
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleLine="true" />
+
+            <TextView
+                android:id="@+id/tv_clear_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear all"
+                android:textColor="@color/gray_text"
+                android:textStyle="italic"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Results Count -->
     <TextView
+        android:id="@+id/tv_results_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search Screen Placeholder"
-        android:textSize="24sp" />
+        android:text="FOUND 0 RESULTS"
+        android:textColor="@color/green_primary"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:textSize="12sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_search_results"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
 </LinearLayout>

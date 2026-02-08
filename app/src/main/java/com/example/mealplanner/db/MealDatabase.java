@@ -8,10 +8,10 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import com.example.mealplanner.model.Meal;
-import com.example.mealplanner.model.MealTypeConverter; // Need to create this if generic type converter is needed, but Type is Enum
+import com.example.mealplanner.db.Converters;
 
-@Database(entities = { Meal.class }, version = 1, exportSchema = false)
-@TypeConverters({ MealTypeConverter.class })
+@Database(entities = { Meal.class }, version = 2, exportSchema = false)
+@TypeConverters({ Converters.class })
 public abstract class MealDatabase extends RoomDatabase {
 
     private static volatile MealDatabase INSTANCE;
@@ -24,6 +24,7 @@ public abstract class MealDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             MealDatabase.class, "meal_database")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
