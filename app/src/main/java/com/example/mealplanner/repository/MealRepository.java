@@ -45,4 +45,7 @@ public interface MealRepository {
     Observable<List<String>> getFilterOptions(FilterType type);
 
     Completable addMealToPlan(Meal meal, Date date, MealType type);
+
+    // Details method
+    Single<Meal> getMealDetails(String mealId);
 }

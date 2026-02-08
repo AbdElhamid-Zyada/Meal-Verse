@@ -232,10 +232,9 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
     @Override
     public void navigateToMealDetails(String mealId) {
-        // Navigation.findNavController(getView()).navigate(...);
-        // For now just toast or placeholder as MealDetails not explicitly requested in
-        // this flow fully wired
-        Toast.makeText(getContext(), "Navigating to Meal Details: " + mealId, Toast.LENGTH_SHORT).show();
+        Bundle args = new Bundle();
+        args.putString("ARG_MEAL_ID", mealId);
+        Navigation.findNavController(requireView()).navigate(R.id.action_searchFragment_to_mealDetailsFragment, args);
     }
 
     @Override

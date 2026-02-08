@@ -80,11 +80,15 @@
         android:id="@+id/searchFragment"
         android:name="com.example.mealplanner.ui.search.view.SearchFragment"
         android:label="SearchFragment"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/mealDetailsFragment"
-        android:name="com.example.mealplanner.ui.meal_details.view.MealDetailsFragment"
+        android:name="com.example.mealplanner.ui.details.view.MealDetailsFragment"
         android:label="MealDetailsFragment"
         tools:layout="@layout/fragment_meal_details" />
 

@@ -301,4 +301,32 @@ public class MealRepositoryImpl implements MealRepository {
                 plannedMealDao
                         .insertPlannedMeal(new com.example.mealplanner.model.PlannedMeal(meal.getId(), date, type)));
     }
+
+    @Override
+    public Single<Meal> getMealDetails(String mealId) {
+        return Single.fromCallable(() -> {
+            // 1. Try to find in cache/mock list first
+            Meal found = findMealById(mealId);
+
+            // 2. If found, ensure it has detailed info (enrich it if it's a basic mock)
+            if (found != null) {
+                if (found.getInstructions() == null) {
+                    found.setInstructions(
+                            "Prepare the brown rice according to the package instructions. Keep warm once cooked..Season the salmon with salt, pepper, and a dash of olive oil. Sear on high heat for 3 minutes per side until caramelized..Slice the avocado and carrots into thin matchsticks or strips for presentation..Assemble the bowl by placing rice at the bottom, topped with salmon, vegetables, and edamame.");
+                }
+                if (found.getYoutubeUrl() == null) {
+                    found.setYoutubeUrl("https://www.youtube.com/watch?v=HuWd4v998OA"); // Example ID
+                }
+                if (found.getMeasures() == null) {
+                    List<String> measures = new java.util.ArrayList<>();
+                    for (int i = 0; i < (found.getIngredients() != null ? found.getIngredients().size() : 0); i++) {
+                        measures.add("1 cup"); // Dummy measure
+                    }
+                    found.setMeasures(measures);
+                }
+                return found;
+            }
+            throw new Exception("Meal not found");
+        });
+    }
 }

@@ -11,7 +11,7 @@ import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.model.PlannedMeal;
 import com.example.mealplanner.db.PlannedMealDao;
 
-@Database(entities = { Meal.class, PlannedMeal.class }, version = 3, exportSchema = false)
+@Database(entities = { Meal.class, PlannedMeal.class }, version = 4, exportSchema = false)
 @TypeConverters({ Converters.class })
 public abstract class MealDatabase extends RoomDatabase {
 

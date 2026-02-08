@@ -122,4 +122,42 @@ public class Meal implements Serializable {
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
     }
+
+    // New fields for Details Screen
+    private String instructions;
+    private String youtubeUrl;
+    private String sourceUrl;
+    private java.util.List<String> measures;
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
+    }
+
+    public String getYoutubeUrl() {
+        return youtubeUrl;
+    }
+
+    public void setYoutubeUrl(String youtubeUrl) {
+        this.youtubeUrl = youtubeUrl;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
+    }
+
+    public java.util.List<String> getMeasures() {
+        return measures;
+    }
+
+    public void setMeasures(java.util.List<String> measures) {
+        this.measures = measures;
+    }
 }
