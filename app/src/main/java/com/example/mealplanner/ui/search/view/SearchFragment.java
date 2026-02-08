@@ -39,6 +39,9 @@ import java.util.Locale;
 
 public class SearchFragment extends Fragment implements SearchContract.View {
 
+    public static final String ARG_FILTER_TYPE = "ARG_FILTER_TYPE";
+    public static final String ARG_FILTER_VALUE = "ARG_FILTER_VALUE";
+
     private SearchContract.Presenter presenter;
     private RecyclerView rvResults;
     private SearchAdapter adapter;
@@ -101,6 +104,15 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         btnCategory.setOnClickListener(v -> presenter.onFilterClicked(FilterType.CATEGORY));
         btnArea.setOnClickListener(v -> presenter.onFilterClicked(FilterType.AREA));
         btnIngredient.setOnClickListener(v -> presenter.onFilterClicked(FilterType.INGREDIENT));
+
+        // Check for navigation arguments (Pre-applied filters)
+        if (getArguments() != null && getArguments().containsKey(ARG_FILTER_TYPE)) {
+            FilterType type = (FilterType) getArguments().getSerializable(ARG_FILTER_TYPE);
+            String value = getArguments().getString(ARG_FILTER_VALUE);
+            if (type != null && value != null) {
+                presenter.onOptionSelected(value, type);
+            }
+        }
     }
 
     @Override

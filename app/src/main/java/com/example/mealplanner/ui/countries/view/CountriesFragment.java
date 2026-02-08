@@ -22,6 +22,7 @@ import com.example.mealplanner.R;
 import com.example.mealplanner.model.Country;
 import com.example.mealplanner.ui.countries.presenter.CountriesContract;
 import com.example.mealplanner.ui.countries.presenter.CountriesPresenter;
+import com.example.mealplanner.ui.search.view.SearchFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,15 @@ public class CountriesFragment extends Fragment implements CountriesContract.Vie
 
     @Override
     public void navigateBack() {
-        Navigation.findNavController(getView()).navigateUp();
+        Navigation.findNavController(requireView()).navigateUp();
+    }
+
+    @Override
+    public void navigateToSearch(String countryName) {
+        Bundle args = new Bundle();
+        args.putSerializable(SearchFragment.ARG_FILTER_TYPE, com.example.mealplanner.model.FilterType.AREA);
+        args.putString(SearchFragment.ARG_FILTER_VALUE, countryName);
+        Navigation.findNavController(requireView()).navigate(R.id.action_countriesFragment_to_searchFragment, args);
     }
 
     // Adapter Class
@@ -130,6 +139,8 @@ public class CountriesFragment extends Fragment implements CountriesContract.Vie
             Country country = countries.get(position);
             holder.tvName.setText(country.getName());
             holder.ivImage.setImageResource(country.getImageResource());
+
+            holder.itemView.setOnClickListener(v -> presenter.onCountryClicked(country));
         }
 
         @Override

@@ -22,6 +22,7 @@ import com.example.mealplanner.R;
 import com.example.mealplanner.model.Ingredient;
 import com.example.mealplanner.ui.ingredients.presenter.IngredientsContract;
 import com.example.mealplanner.ui.ingredients.presenter.IngredientsPresenter;
+import com.example.mealplanner.ui.search.view.SearchFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,15 @@ public class IngredientsFragment extends Fragment implements IngredientsContract
 
     @Override
     public void navigateBack() {
-        Navigation.findNavController(getView()).navigateUp();
+        Navigation.findNavController(requireView()).navigateUp();
+    }
+
+    @Override
+    public void navigateToSearch(String ingredientName) {
+        Bundle args = new Bundle();
+        args.putSerializable(SearchFragment.ARG_FILTER_TYPE, com.example.mealplanner.model.FilterType.INGREDIENT);
+        args.putString(SearchFragment.ARG_FILTER_VALUE, ingredientName);
+        Navigation.findNavController(requireView()).navigate(R.id.action_ingredientsFragment_to_searchFragment, args);
     }
 
     // Adapter Class
@@ -130,7 +139,8 @@ public class IngredientsFragment extends Fragment implements IngredientsContract
             Ingredient ingredient = ingredients.get(position);
             holder.tvName.setText(ingredient.getName());
             holder.ivImage.setImageResource(ingredient.getImageResource());
-            // In real app, remove tint if using real images
+
+            holder.itemView.setOnClickListener(v -> presenter.onIngredientClicked(ingredient));
         }
 
         @Override

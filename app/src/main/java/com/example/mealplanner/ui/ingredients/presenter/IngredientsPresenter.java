@@ -60,6 +60,11 @@ public class IngredientsPresenter implements IngredientsContract.Presenter {
     }
 
     @Override
+    public void onIngredientClicked(Ingredient ingredient) {
+        view.navigateToSearch(ingredient.getName());
+    }
+
+    @Override
     public void onBackClicked() {
         view.navigateBack();
     }

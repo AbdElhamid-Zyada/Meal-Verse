@@ -14,6 +14,8 @@ public interface CountriesContract {
         void showError(String message);
 
         void navigateBack();
+
+        void navigateToSearch(String countryName);
     }
 
     interface Presenter {
@@ -22,6 +24,8 @@ public interface CountriesContract {
         void searchCountries(String query);
 
         void onBackClicked();
+
+        void onCountryClicked(Country country);
 
         void dispose();
     }

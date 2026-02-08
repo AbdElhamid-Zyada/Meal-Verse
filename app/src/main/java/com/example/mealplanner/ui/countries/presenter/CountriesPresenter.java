@@ -55,6 +55,11 @@ public class CountriesPresenter implements CountriesContract.Presenter {
     }
 
     @Override
+    public void onCountryClicked(Country country) {
+        view.navigateToSearch(country.getName());
+    }
+
+    @Override
     public void onBackClicked() {
         view.navigateBack();
     }

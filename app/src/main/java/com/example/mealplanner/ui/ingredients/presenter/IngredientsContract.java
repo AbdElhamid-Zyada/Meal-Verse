@@ -14,6 +14,8 @@ public interface IngredientsContract {
         void showError(String message);
 
         void navigateBack();
+
+        void navigateToSearch(String ingredientName);
     }
 
     interface Presenter {
@@ -22,6 +24,8 @@ public interface IngredientsContract {
         void searchIngredients(String query);
 
         void onBackClicked();
+
+        void onIngredientClicked(Ingredient ingredient);
 
         void dispose();
     }
