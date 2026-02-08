@@ -8,15 +8,18 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import com.example.mealplanner.model.Meal;
-import com.example.mealplanner.db.Converters;
+import com.example.mealplanner.model.PlannedMeal;
+import com.example.mealplanner.db.PlannedMealDao;
 
-@Database(entities = { Meal.class }, version = 2, exportSchema = false)
+@Database(entities = { Meal.class, PlannedMeal.class }, version = 3, exportSchema = false)
 @TypeConverters({ Converters.class })
 public abstract class MealDatabase extends RoomDatabase {
 
     private static volatile MealDatabase INSTANCE;
 
     public abstract MealDao mealDao();
+
+    public abstract PlannedMealDao plannedMealDao();
 
     public static MealDatabase getInstance(Context context) {
         if (INSTANCE == null) {

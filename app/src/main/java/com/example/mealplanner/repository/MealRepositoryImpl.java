@@ -26,16 +26,57 @@ public class MealRepositoryImpl implements MealRepository {
     // Mock database for planner: Map<DateString, Map<MealType, Meal>>
     private Map<String, Map<MealType, Meal>> plannedMeals;
 
-    // Room database for favorites
+    // Room database for favorites and planned meals
     private MealDao mealDao;
+    private com.example.mealplanner.db.PlannedMealDao plannedMealDao;
+
+    // Disposables for repository internal subscriptions
+    private final io.reactivex.rxjava3.disposables.CompositeDisposable disposables = new io.reactivex.rxjava3.disposables.CompositeDisposable();
 
     private List<Meal> allMockMeals;
 
     private MealRepositoryImpl(Context context) {
         MealDatabase db = MealDatabase.getInstance(context);
         mealDao = db.mealDao();
+        plannedMealDao = db.plannedMealDao();
         plannedMeals = new HashMap<>();
         initializeMockMeals();
+        loadPlannedMealsFromDb();
+    }
+
+    private void loadPlannedMealsFromDb() {
+        disposables.add(plannedMealDao.getAllPlannedMeals()
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(
+                        storedPlans -> {
+                            for (com.example.mealplanner.model.PlannedMeal plan : storedPlans) {
+                                // Find the meal object by ID
+                                Meal meal = findMealById(plan.getMealId());
+                                if (meal != null) {
+                                    // Update cache
+                                    // Note: Using same logic as addMealToPlan but skipping DB insert
+                                    String dateKey = getDateKey(plan.getDate());
+                                    if (!plannedMeals.containsKey(dateKey)) {
+                                        plannedMeals.put(dateKey, new HashMap<>());
+                                    }
+                                    plannedMeals.get(dateKey).put(plan.getType(), meal);
+                                }
+                            }
+                        },
+                        throwable -> {
+                            // Log error or handle
+                            System.err.println("Error loading planned meals: " + throwable.getMessage());
+                        }));
+    }
+
+    private Meal findMealById(String id) {
+        for (Meal meal : allMockMeals) {
+            if (meal.getId().equals(id)) {
+                return meal;
+            }
+        }
+        return null;
     }
 
     private void initializeMockMeals() {
@@ -94,6 +135,15 @@ public class MealRepositoryImpl implements MealRepository {
                 dayMeals.remove(type);
             }
         }
+
+        // Remove from DB
+        disposables.add(plannedMealDao.deletePlannedMeal(date, type)
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .subscribe(
+                        () -> {
+                        },
+                        throwable -> System.err
+                                .println("Error deleting planned meal from DB: " + throwable.getMessage())));
     }
 
     private String getDateKey(Date date) {
@@ -240,11 +290,15 @@ public class MealRepositoryImpl implements MealRepository {
     @Override
     public Completable addMealToPlan(Meal meal, Date date, MealType type) {
         return Completable.fromAction(() -> {
+            // Update Cache
             String dateKey = getDateKey(date);
             if (!plannedMeals.containsKey(dateKey)) {
                 plannedMeals.put(dateKey, new HashMap<>());
             }
             plannedMeals.get(dateKey).put(type, meal);
-        });
+        }).andThen(
+                // Update DB
+                plannedMealDao
+                        .insertPlannedMeal(new com.example.mealplanner.model.PlannedMeal(meal.getId(), date, type)));
     }
 }
