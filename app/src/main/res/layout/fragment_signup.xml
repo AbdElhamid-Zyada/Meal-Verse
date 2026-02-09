@@ -297,22 +297,7 @@
                 app:strokeColor="#BDBDBD"
                 app:strokeWidth="1dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_facebook_s"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="Facebook"
-                android:textColor="@color/text_primary"
-                app:cornerRadius="12dp"
-                app:icon="@drawable/ic_facebook"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@null"
-                app:strokeColor="#BDBDBD"
-                app:strokeWidth="1dp" />
+
         </LinearLayout>
 
         <TextView

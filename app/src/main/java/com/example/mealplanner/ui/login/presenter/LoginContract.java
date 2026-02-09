@@ -15,6 +15,8 @@ public interface LoginContract {
         void hideLoading();
 
         void showError(String message);
+
+        void startGoogleSignIn();
     }
 
     interface Presenter {
@@ -23,5 +25,9 @@ public interface LoginContract {
         void onGuestClicked(android.view.View view);
 
         void onSignupPromptClicked(android.view.View view);
+
+        void onGoogleClicked(android.view.View view);
+
+        void handleGoogleSignInResult(android.view.View view, String idToken);
     }
 }

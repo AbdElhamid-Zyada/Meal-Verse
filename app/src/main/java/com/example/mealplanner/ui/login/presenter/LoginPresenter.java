@@ -2,7 +2,9 @@ package com.example.mealplanner.ui.login.presenter;
 
 import android.view.View;
 
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginPresenter implements LoginContract.Presenter {
     private LoginContract.View mView;
@@ -39,5 +41,30 @@ public class LoginPresenter implements LoginContract.Presenter {
     @Override
     public void onSignupPromptClicked(View view) {
         mView.navigateToSignup(view);
+    }
+
+    @Override
+    public void onGoogleClicked(View view) {
+        mView.startGoogleSignIn();
+    }
+
+    @Override
+    public void handleGoogleSignInResult(View view, String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        signInWithCredential(view, credential);
+    }
+
+    private void signInWithCredential(View view, AuthCredential credential) {
+        mView.showLoading();
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(task -> {
+                    mView.hideLoading();
+                    if (task.isSuccessful()) {
+                        mView.navigateToHome(view);
+                    } else {
+                        mView.showError(task.getException() != null ? task.getException().getMessage()
+                                : "Authentication failed");
+                    }
+                });
     }
 }

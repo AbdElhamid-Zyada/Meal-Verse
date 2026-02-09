@@ -3,6 +3,8 @@ package com.example.mealplanner;
 import android.os.Bundle;
 import android.view.View;
 
+import android.util.Log;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -122,4 +124,5 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             }
         }
     }
+
 }
