@@ -11,12 +11,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.content.Intent;
 import android.util.Log;
 
 import com.example.mealplanner.R;
+import com.example.mealplanner.repository.UserRepositoryImpl;
 import com.example.mealplanner.ui.login.presenter.LoginContract;
 import com.example.mealplanner.ui.login.presenter.LoginPresenter;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -34,9 +36,11 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
         private LoginContract.Presenter presenter;
         private EditText etEmail, etPassword;
+        private android.widget.CheckBox cbRememberMe;
         private ProgressBar progressBar;
         private GoogleSignInClient mGoogleSignInClient;
         private ActivityResultLauncher<Intent> googleSignInLauncher;
+        private NavController navController;
 
         @Nullable
         @Override
@@ -49,7 +53,15 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
                 super.onViewCreated(view, savedInstanceState);
 
-                presenter = new LoginPresenter(this);
+                // Initialize UI before Presenter
+                etEmail = view.findViewById(R.id.et_email);
+                etPassword = view.findViewById(R.id.et_password);
+                cbRememberMe = view.findViewById(R.id.cb_remember_me);
+                progressBar = view.findViewById(R.id.progress_bar);
+                navController = Navigation.findNavController(view);
+
+                // Initialize Presenter
+                presenter = new LoginPresenter(this, UserRepositoryImpl.getInstance(requireContext()));
 
                 // Configure Google Sign In
                 GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -67,14 +79,11 @@ public class LoginFragment extends Fragment implements LoginContract.View {
                                         handleGoogleSignInResult(task);
                                 });
 
-                etEmail = view.findViewById(R.id.et_email);
-                etPassword = view.findViewById(R.id.et_password);
-                progressBar = view.findViewById(R.id.progress_bar);
-
                 view.findViewById(R.id.btn_login).setOnClickListener(v -> {
                         String email = etEmail.getText().toString().trim();
                         String password = etPassword.getText().toString().trim();
-                        presenter.onLoginClicked(v, email, password);
+                        boolean rememberMe = cbRememberMe.isChecked();
+                        presenter.onLoginClicked(v, email, password, rememberMe);
                 });
 
                 view.findViewById(R.id.btn_guest).setOnClickListener(v -> presenter.onGuestClicked(v));
@@ -88,7 +97,7 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
                 try {
                         GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-                        presenter.handleGoogleSignInResult(getView(), account.getIdToken());
+                        presenter.handleGoogleSignInResult(getView(), account.getIdToken(), cbRememberMe.isChecked());
                 } catch (ApiException e) {
                         showError("Google sign in failed: " + e.getMessage());
                 }

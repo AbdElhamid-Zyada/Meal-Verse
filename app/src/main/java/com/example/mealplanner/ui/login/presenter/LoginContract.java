@@ -20,7 +20,7 @@ public interface LoginContract {
     }
 
     interface Presenter {
-        void onLoginClicked(android.view.View view, String email, String password);
+        void onLoginClicked(android.view.View view, String email, String password, boolean isRememberMeChecked);
 
         void onGuestClicked(android.view.View view);
 
@@ -28,6 +28,6 @@ public interface LoginContract {
 
         void onGoogleClicked(android.view.View view);
 
-        void handleGoogleSignInResult(android.view.View view, String idToken);
+        void handleGoogleSignInResult(android.view.View view, String idToken, boolean isRememberMeChecked);
     }
 }
