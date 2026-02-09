@@ -45,6 +45,16 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Completable saveGuestMeal(String mealId, long timestamp) {
+        return localDataSource.saveGuestMeal(mealId, timestamp);
+    }
+
+    @Override
+    public Single<androidx.core.util.Pair<String, Long>> getGuestMeal() {
+        return localDataSource.getGuestMeal();
+    }
+
+    @Override
     public Completable logout() {
         return localDataSource.clearUserSession();
     }

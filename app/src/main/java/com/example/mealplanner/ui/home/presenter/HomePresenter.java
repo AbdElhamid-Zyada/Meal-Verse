@@ -11,6 +11,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class HomePresenter implements HomeContract.Presenter {
@@ -77,8 +78,7 @@ public class HomePresenter implements HomeContract.Presenter {
                 .subscribe(
                         isGuest -> {
                             if (isGuest) {
-                                // Guest Mode: Just fetch a random meal, don't save to Firestore
-                                fetchRandomMealForGuest();
+                                checkSavedGuestMeal();
                             } else {
                                 // Authenticated Mode: Proceed with Firestore logic
                                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -92,6 +92,37 @@ public class HomePresenter implements HomeContract.Presenter {
                         error -> mView.showMealOfTheDayError("Failed to check guest status")));
     }
 
+    private void checkSavedGuestMeal() {
+        disposables.add(userRepository.getGuestMeal()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        pair -> {
+                            String savedId = pair.first;
+                            Long savedDate = pair.second;
+                            long todayStart = getStartOfDayTimestamp();
+
+                            if (savedId != null && savedDate != null && savedDate == todayStart) {
+                                // Load saved meal
+                                fetchMealById(savedId);
+                            } else {
+                                // Fetch new random meal
+                                fetchRandomMealForGuest();
+                            }
+                        },
+                        error -> fetchRandomMealForGuest() // Fallback
+                ));
+    }
+
+    private long getStartOfDayTimestamp() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
     private void fetchRandomMealForGuest() {
         disposables.add(
                 repository.getRandomMeal()
@@ -102,11 +133,26 @@ public class HomePresenter implements HomeContract.Presenter {
                                     currentMealOfTheDay = meal;
                                     mView.displayMealOfTheDay(meal);
                                     mView.hideLoading();
+
+                                    // Save for guest
+                                    saveGuestMeal(meal.getId());
                                 },
                                 error -> {
                                     mView.hideLoading();
                                     mView.showMealOfTheDayError("Failed to fetch random meal");
                                 }));
+    }
+
+    private void saveGuestMeal(String mealId) {
+        long todayStart = getStartOfDayTimestamp();
+        disposables.add(userRepository.saveGuestMeal(mealId, todayStart)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        () -> {
+                        },
+                        error -> {
+                        }));
     }
 
     private void loadAuthenticatedMealOfTheDay(String userId) {

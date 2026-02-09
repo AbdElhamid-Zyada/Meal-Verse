@@ -12,5 +12,9 @@ public interface UserRepository {
 
     Single<Boolean> isGuestMode();
 
+    Completable saveGuestMeal(String mealId, long timestamp);
+
+    Single<androidx.core.util.Pair<String, Long>> getGuestMeal();
+
     Completable logout();
 }
