@@ -1,25 +1,33 @@
 package com.example.mealplanner.ui.profile.presenter;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class ProfilePresenter implements ProfileContract.Presenter {
 
     private final ProfileContract.View view;
+    private final FirebaseAuth mAuth;
 
     public ProfilePresenter(ProfileContract.View view) {
         this.view = view;
+        this.mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     public void loadUserProfile() {
-        // Mock fetching user email.
-        // In real app, use FirebaseAuth.getInstance().getCurrentUser().getEmail()
-        // Checking if we can use a mock user or if there is a centralized UserSession
-        // For now, hardcode as per request "alex.johnson@example.com" or similar from
-        // screenshot
-        // User request: "only keep the email that will be fetched from the user email
-        // that will log in"
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String name = currentUser.getDisplayName();
+            String email = currentUser.getEmail();
 
-        String email = "alex.johnson@example.com";
-        view.showEmail(email);
+            if (name == null || name.isEmpty()) {
+                name = "No Name";
+            }
+
+            view.showUserData(name, email != null ? email : "No Email");
+        } else {
+            view.navigateToLogin();
+        }
     }
 
     @Override
@@ -39,8 +47,7 @@ public class ProfilePresenter implements ProfileContract.Presenter {
 
     @Override
     public void onLogoutClicked() {
-        // Perform logout logic (e.g., FirebaseAuth.getInstance().signOut())
-        // Then navigate to login
+        mAuth.signOut();
         view.showMessage("Logged out successfully");
         view.navigateToLogin();
     }

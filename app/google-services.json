@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "35468613980",
+    "project_id": "meal-verse",
+    "storage_bucket": "meal-verse.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:35468613980:android:e1b29733e525c944c90999",
+        "android_client_info": {
+          "package_name": "com.example.mealplanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh93uUm8SeGK7Lluelp_ZzaQQdGrXWeyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

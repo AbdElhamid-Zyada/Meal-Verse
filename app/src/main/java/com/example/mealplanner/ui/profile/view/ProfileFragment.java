@@ -21,7 +21,7 @@ import com.example.mealplanner.ui.profile.presenter.ProfilePresenter;
 public class ProfileFragment extends Fragment implements ProfileContract.View {
 
     private ProfileContract.Presenter presenter;
-    private TextView tvEmail;
+    private TextView tvName, tvEmail;
 
     @Nullable
     @Override
@@ -35,15 +35,14 @@ public class ProfileFragment extends Fragment implements ProfileContract.View {
         super.onViewCreated(view, savedInstanceState);
         presenter = new ProfilePresenter(this);
 
+        tvName = view.findViewById(R.id.tv_user_name);
         tvEmail = view.findViewById(R.id.tv_user_email);
 
         // Setup Navigation Items
         setupNavItem(view.findViewById(R.id.btn_nav_home), "Home Page", R.drawable.ic_home,
                 v -> presenter.onHomeClicked());
         setupNavItem(view.findViewById(R.id.btn_nav_planner), "My Weekly Plan", R.drawable.ic_calendar_filled,
-                v -> presenter.onPlannerClicked()); // Using filled calendar or normal? Using filled as per requested
-                                                    // icon style or just generic? The prompt says "planner icon ...
-                                                    // strokfed and filled" for bottom nav. Here generic is fine.
+                v -> presenter.onPlannerClicked());
         setupNavItem(view.findViewById(R.id.btn_nav_favorites), "Favorite Meals", R.drawable.ic_favorite,
                 v -> presenter.onFavoritesClicked());
 
@@ -59,15 +58,18 @@ public class ProfileFragment extends Fragment implements ProfileContract.View {
 
         tvTitle.setText(title);
         ivIcon.setImageResource(iconRes);
-        // Assuming tint is handled in XML or we can set it here if needed.
-        // XML had gray tint.
 
         itemView.setOnClickListener(listener);
     }
 
     @Override
-    public void showEmail(String email) {
-        tvEmail.setText(email);
+    public void showUserData(String name, String email) {
+        if (tvName != null) {
+            tvName.setText(name);
+        }
+        if (tvEmail != null) {
+            tvEmail.setText(email);
+        }
     }
 
     @Override
@@ -82,20 +84,12 @@ public class ProfileFragment extends Fragment implements ProfileContract.View {
 
     @Override
     public void navigateToFavorites() {
-        // Assuming functionality is SavedMealsFragment based on "saved" package
         Navigation.findNavController(requireView()).navigate(R.id.savedMealsFragment);
     }
 
     @Override
     public void navigateToLogin() {
-        // Navigate to login (Guest -> Login or directly Login)
-        // Assuming R.id.loginFragment exists based on file structure
-        // Or if using main nav actions.
-        // Try direct ID first.
         Navigation.findNavController(requireView()).navigate(R.id.loginFragment);
-
-        // Or pop back stack if that's safer?
-        // Best is to navigate to the start destination or Login flow.
     }
 
     @Override

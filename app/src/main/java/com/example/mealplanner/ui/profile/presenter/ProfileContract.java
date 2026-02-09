@@ -2,7 +2,7 @@ package com.example.mealplanner.ui.profile.presenter;
 
 public interface ProfileContract {
     interface View {
-        void showEmail(String email);
+        void showUserData(String name, String email);
 
         void navigateToHome();
 

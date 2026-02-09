@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -46,6 +47,8 @@ dependencies {
     implementation(libs.room.rxjava3)
     implementation(libs.rxjava)
     implementation(libs.rxandroid)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
     annotationProcessor(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

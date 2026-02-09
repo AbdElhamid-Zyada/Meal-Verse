@@ -73,6 +73,7 @@
                 android:background="@drawable/bg_input_field">
 
                 <EditText
+                    android:id="@+id/et_name"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_toStartOf="@+id/iv_person"
@@ -110,6 +111,7 @@
                 android:background="@drawable/bg_input_field">
 
                 <EditText
+                    android:id="@+id/et_email_signup"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_toStartOf="@+id/iv_mail"
@@ -148,6 +150,7 @@
                 android:background="@drawable/bg_input_field">
 
                 <EditText
+                    android:id="@+id/et_password_signup"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_toStartOf="@+id/iv_visibility_p"
@@ -267,10 +270,11 @@
         <!-- Social Buttons -->
         <LinearLayout
             android:id="@+id/social_container_s"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="56dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:gravity="center"
+            android:layout_marginEnd="16dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -279,15 +283,16 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_google_s"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="8dp"
-                android:padding="0dp"
+                android:layout_weight="1"
+                android:text="Google"
+                android:textColor="@color/text_primary"
                 app:cornerRadius="12dp"
                 app:icon="@drawable/ic_google"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp"
-                app:iconSize="32dp"
+                app:iconPadding="8dp"
                 app:iconTint="@null"
                 app:strokeColor="#BDBDBD"
                 app:strokeWidth="1dp" />
@@ -295,15 +300,16 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_facebook_s"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
-                android:padding="0dp"
+                android:layout_weight="1"
+                android:text="Facebook"
+                android:textColor="@color/text_primary"
                 app:cornerRadius="12dp"
                 app:icon="@drawable/ic_facebook"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp"
-                app:iconSize="32dp"
+                app:iconPadding="8dp"
                 app:iconTint="@null"
                 app:strokeColor="#BDBDBD"
                 app:strokeWidth="1dp" />
@@ -321,6 +327,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/social_container_s" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_signup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -26,24 +26,29 @@
         android:gravity="center"
         android:paddingVertical="32dp">
 
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_person"
-            app:tint="@color/black" />
-            <!-- Note: Using ic_person as placeholder. 
+        <!-- Note: Using ic_person as placeholder.
                  The request says "remove the name and only keep the email". 
                  But usually a picture/avatar is implied by "profile".
                  I'll add the email below it. -->
 
         <TextView
-            android:id="@+id/tv_user_email"
+            android:id="@+id/tv_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="User Name"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_user_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="user@example.com"
             android:textColor="@color/gray_800"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
     </LinearLayout>
 
     <!-- Navigation Options -->

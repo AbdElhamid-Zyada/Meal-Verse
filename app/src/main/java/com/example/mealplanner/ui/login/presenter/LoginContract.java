@@ -9,10 +9,16 @@ public interface LoginContract {
         void navigateToGuest(android.view.View view);
 
         void navigateToSignup(android.view.View view);
+
+        void showLoading();
+
+        void hideLoading();
+
+        void showError(String message);
     }
 
     interface Presenter {
-        void onLoginClicked(android.view.View view);
+        void onLoginClicked(android.view.View view, String email, String password);
 
         void onGuestClicked(android.view.View view);
 

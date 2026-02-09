@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +20,8 @@ import com.example.mealplanner.ui.login.presenter.LoginPresenter;
 public class LoginFragment extends Fragment implements LoginContract.View {
 
         private LoginContract.Presenter presenter;
+        private EditText etEmail, etPassword;
+        private ProgressBar progressBar;
 
         @Nullable
         @Override
@@ -31,8 +36,15 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
                 presenter = new LoginPresenter(this);
 
-                // Navigation triggers
-                view.findViewById(R.id.btn_login).setOnClickListener(v -> presenter.onLoginClicked(v));
+                etEmail = view.findViewById(R.id.et_email);
+                etPassword = view.findViewById(R.id.et_password);
+                progressBar = view.findViewById(R.id.progress_bar);
+
+                view.findViewById(R.id.btn_login).setOnClickListener(v -> {
+                        String email = etEmail.getText().toString().trim();
+                        String password = etPassword.getText().toString().trim();
+                        presenter.onLoginClicked(v, email, password);
+                });
 
                 view.findViewById(R.id.btn_guest).setOnClickListener(v -> presenter.onGuestClicked(v));
 
@@ -53,6 +65,23 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         public void navigateToSignup(View view) {
                 Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_signupFragment);
         }
+
+        @Override
+        public void showLoading() {
+                if (progressBar != null) {
+                        progressBar.setVisibility(View.VISIBLE);
+                }
+        }
+
+        @Override
+        public void hideLoading() {
+                if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                }
+        }
+
+        @Override
+        public void showError(String message) {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+        }
 }
-
-
