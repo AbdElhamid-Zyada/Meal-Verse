@@ -79,7 +79,9 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         adapter = new SearchAdapter();
         rvResults.setAdapter(adapter);
 
-        presenter = new SearchPresenter(this);
+        // Initialize Presenter
+        presenter = new SearchPresenter(this,
+                com.example.mealplanner.repository.UserRepositoryImpl.getInstance(requireContext()));
 
         // Listeners
         btnBack.setOnClickListener(v -> presenter.onBackClicked());

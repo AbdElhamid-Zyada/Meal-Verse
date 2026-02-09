@@ -7,7 +7,6 @@ public class CountryFlagMapper {
     private static final Map<String, String> AREA_TO_CODE = new HashMap<>();
 
     static {
-        // Map MealDB area names to ISO country codes
         AREA_TO_CODE.put("American", "us");
         AREA_TO_CODE.put("British", "gb");
         AREA_TO_CODE.put("Canadian", "ca");

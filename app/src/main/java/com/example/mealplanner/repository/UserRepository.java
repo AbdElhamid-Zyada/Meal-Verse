@@ -8,5 +8,9 @@ public interface UserRepository {
 
     Single<Boolean> isUserRemembered();
 
+    Completable saveGuestMode(boolean isGuest);
+
+    Single<Boolean> isGuestMode();
+
     Completable logout();
 }

@@ -85,7 +85,9 @@ public class MealDetailsFragment extends Fragment implements MealDetailsContract
         webViewYouTube.setWebViewClient(new WebViewClient());
 
         // Initialize Presenter
-        presenter = new MealDetailsPresenter(this);
+        // Initialize Presenter
+        presenter = new MealDetailsPresenter(this,
+                com.example.mealplanner.repository.UserRepositoryImpl.getInstance(requireContext()));
 
         // Setup Toolbar
         toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).navigateUp());

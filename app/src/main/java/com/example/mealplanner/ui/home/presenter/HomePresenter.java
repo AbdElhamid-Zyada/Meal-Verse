@@ -18,11 +18,13 @@ public class HomePresenter implements HomeContract.Presenter {
     private MealRepositoryImpl repository;
     private CompositeDisposable disposables;
     private Meal currentMealOfTheDay;
+    private com.example.mealplanner.repository.UserRepository userRepository;
 
-    public HomePresenter(HomeContract.View view) {
+    public HomePresenter(HomeContract.View view, com.example.mealplanner.repository.UserRepository userRepository) {
         this.mView = view;
         this.repository = MealRepositoryImpl.getInstance();
         this.disposables = new CompositeDisposable();
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -69,15 +71,46 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void loadMealOfTheDay() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            mView.showMealOfTheDayError("Please login to see Meal of the Day");
-            return;
-        }
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                // Guest Mode: Just fetch a random meal, don't save to Firestore
+                                fetchRandomMealForGuest();
+                            } else {
+                                // Authenticated Mode: Proceed with Firestore logic
+                                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                                if (currentUser == null) {
+                                    mView.showMealOfTheDayError("Please login to see Meal of the Day");
+                                    return;
+                                }
+                                loadAuthenticatedMealOfTheDay(currentUser.getUid());
+                            }
+                        },
+                        error -> mView.showMealOfTheDayError("Failed to check guest status")));
+    }
 
-        String userId = currentUser.getUid();
+    private void fetchRandomMealForGuest() {
+        disposables.add(
+                repository.getRandomMeal()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                meal -> {
+                                    currentMealOfTheDay = meal;
+                                    mView.displayMealOfTheDay(meal);
+                                    mView.hideLoading();
+                                },
+                                error -> {
+                                    mView.hideLoading();
+                                    mView.showMealOfTheDayError("Failed to fetch random meal");
+                                }));
+    }
+
+    private void loadAuthenticatedMealOfTheDay(String userId) {
         mView.showLoading();
-
         // Check if meal of the day exists in Firestore
         disposables.add(
                 repository.getMealOfTheDayId(userId)

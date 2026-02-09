@@ -10,6 +10,7 @@ public class UserLocalDataSourceImpl implements UserLocalDataSource {
 
     private static final String PREF_NAME = "user_prefs";
     private static final String KEY_IS_REMEMBERED = "is_remembered";
+    private static final String KEY_IS_GUEST = "is_guest";
     private final SharedPreferences sharedPreferences;
 
     public UserLocalDataSourceImpl(Context context) {
@@ -29,9 +30,24 @@ public class UserLocalDataSourceImpl implements UserLocalDataSource {
     }
 
     @Override
+    public Completable saveGuestMode(boolean isGuest) {
+        return Completable.fromAction(() -> {
+            sharedPreferences.edit().putBoolean(KEY_IS_GUEST, isGuest).apply();
+        });
+    }
+
+    @Override
+    public Single<Boolean> isGuestMode() {
+        return Single.fromCallable(() -> sharedPreferences.getBoolean(KEY_IS_GUEST, false));
+    }
+
+    @Override
     public Completable clearUserSession() {
         return Completable.fromAction(() -> {
-            sharedPreferences.edit().remove(KEY_IS_REMEMBERED).apply();
+            sharedPreferences.edit()
+                    .remove(KEY_IS_REMEMBERED)
+                    .remove(KEY_IS_GUEST)
+                    .apply();
         });
     }
 }

@@ -7,14 +7,33 @@ public class ProfilePresenter implements ProfileContract.Presenter {
 
     private final ProfileContract.View view;
     private final FirebaseAuth mAuth;
+    private final com.example.mealplanner.repository.UserRepository userRepository;
+    private final io.reactivex.rxjava3.disposables.CompositeDisposable disposables = new io.reactivex.rxjava3.disposables.CompositeDisposable();
 
-    public ProfilePresenter(ProfileContract.View view) {
+    public ProfilePresenter(ProfileContract.View view,
+            com.example.mealplanner.repository.UserRepository userRepository) {
         this.view = view;
         this.mAuth = FirebaseAuth.getInstance();
+        this.userRepository = userRepository;
     }
 
     @Override
     public void loadUserProfile() {
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                view.showUserData("GUEST", "");
+                            } else {
+                                loadAuthenticatedUserProfile();
+                            }
+                        },
+                        error -> view.showMessage("Error checking guest status")));
+    }
+
+    private void loadAuthenticatedUserProfile() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             String name = currentUser.getDisplayName();
@@ -47,8 +66,19 @@ public class ProfilePresenter implements ProfileContract.Presenter {
 
     @Override
     public void onLogoutClicked() {
-        mAuth.signOut();
-        view.showMessage("Logged out successfully");
-        view.navigateToLogin();
+        disposables.add(userRepository.logout()
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(
+                        () -> {
+                            mAuth.signOut();
+                            view.showMessage("Logged out successfully");
+                            view.navigateToLogin();
+                        },
+                        error -> view.showMessage("Error logging out: " + error.getMessage())));
+    }
+
+    public void dispose() {
+        disposables.clear();
     }
 }

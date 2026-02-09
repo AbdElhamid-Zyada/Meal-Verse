@@ -33,7 +33,10 @@ public class ProfileFragment extends Fragment implements ProfileContract.View {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        presenter = new ProfilePresenter(this);
+
+        // Initialize Presenter
+        presenter = new ProfilePresenter(this,
+                com.example.mealplanner.repository.UserRepositoryImpl.getInstance(requireContext()));
 
         tvName = view.findViewById(R.id.tv_user_name);
         tvEmail = view.findViewById(R.id.tv_user_email);

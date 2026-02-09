@@ -39,7 +39,9 @@ public class HomeFragment extends Fragment implements HomeContract.View {
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
                 super.onViewCreated(view, savedInstanceState);
-                presenter = new HomePresenter(this);
+                // Initialize Presenter
+                presenter = new HomePresenter(this,
+                                com.example.mealplanner.repository.UserRepositoryImpl.getInstance(requireContext()));
 
                 // Search Bar Click
                 view.findViewById(R.id.card_search).setOnClickListener(v -> presenter.onSearchClicked());

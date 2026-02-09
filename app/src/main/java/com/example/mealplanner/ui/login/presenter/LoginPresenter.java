@@ -36,6 +36,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                             // Save remember me preference
                             if (isRememberMeChecked) {
                                 disposables.add(userRepository.setUserRemembered(true)
+                                        .andThen(userRepository.saveGuestMode(false))
                                         .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
                                         .observeOn(
                                                 io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
@@ -48,7 +49,8 @@ public class LoginPresenter implements LoginContract.Presenter {
                                 // temporary.
                                 // We can clear it to be safe or just not set it.
                                 // Let's ensure we clear it if unchecked to be consistent.
-                                disposables.add(userRepository.setUserRemembered(false) // Or logout logic
+                                disposables.add(userRepository.setUserRemembered(false)
+                                        .andThen(userRepository.saveGuestMode(false))
                                         .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
                                         .observeOn(
                                                 io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
@@ -65,7 +67,13 @@ public class LoginPresenter implements LoginContract.Presenter {
 
     @Override
     public void onGuestClicked(View view) {
-        mView.navigateToGuest(view);
+        disposables.add(userRepository.saveGuestMode(true)
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(
+                        () -> mView.navigateToHome(view), // Navigate directly to Home as per user request flow implies
+                                                          // full app access
+                        throwable -> mView.showError("Failed to set guest mode")));
     }
 
     @Override
@@ -94,6 +102,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                         if (user != null) {
                             if (isRememberMeChecked) {
                                 disposables.add(userRepository.setUserRemembered(true)
+                                        .andThen(userRepository.saveGuestMode(false))
                                         .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
                                         .observeOn(
                                                 io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
@@ -102,6 +111,7 @@ public class LoginPresenter implements LoginContract.Presenter {
                                                 throwable -> mView.showError("Failed to save preference")));
                             } else {
                                 disposables.add(userRepository.setUserRemembered(false)
+                                        .andThen(userRepository.saveGuestMode(false))
                                         .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
                                         .observeOn(
                                                 io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())

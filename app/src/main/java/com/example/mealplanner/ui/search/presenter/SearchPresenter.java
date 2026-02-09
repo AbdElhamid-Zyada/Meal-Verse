@@ -24,15 +24,17 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     private final SearchContract.View view;
     private final MealRepository repository;
+    private final com.example.mealplanner.repository.UserRepository userRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private final PublishSubject<String> searchSubject = PublishSubject.create();
 
     private String currentQuery = "";
     private final Map<FilterType, String> activeFilters = new HashMap<>();
 
-    public SearchPresenter(SearchContract.View view) {
+    public SearchPresenter(SearchContract.View view, com.example.mealplanner.repository.UserRepository userRepository) {
         this.view = view;
         this.repository = MealRepositoryImpl.getInstance();
+        this.userRepository = userRepository;
         setupDebouncedSearch();
     }
 
@@ -146,6 +148,21 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void onAddToPlanClicked(Meal meal) {
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                view.showMessage("Adding to weekly plan is not available in guest mode");
+                                return;
+                            }
+                            showDatePicker(meal);
+                        },
+                        error -> view.showMessage("Error checking guest status")));
+    }
+
+    private void showDatePicker(Meal meal) {
         // Generate next 7 days dates
         List<Date> availableDates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -173,18 +190,26 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void onFavoriteClicked(Meal meal) {
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                view.showMessage("Adding to favorites is not available in guest mode");
+                                return;
+                            }
+                            toggleFavorite(meal);
+                        },
+                        error -> view.showMessage("Error checking guest status")));
+    }
+
+    private void toggleFavorite(Meal meal) {
         // Toggle state immediately for UI responsiveness
         boolean newStatus = !meal.isFavorite();
         meal.setFavorite(newStatus);
 
-        // Notify view to update this specific item (simplest is to just refresh the
-        // list or let the adapter handle it if reference triggers change)
-        // Since we modified the object in the list that the adapter holds, calling
-        // notifyDataSetChanged or notifyItemChanged is enough.
-        // However, we should wait for DB success effectively? Protocol says
-        // "isFavorite" check.
-
-        // Better approach: Optimistic update
+        // Optimistic update
         view.updateMeal(meal);
 
         // Perform DB operation

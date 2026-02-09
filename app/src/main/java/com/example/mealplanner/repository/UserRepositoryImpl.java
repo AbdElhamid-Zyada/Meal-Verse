@@ -35,6 +35,16 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Completable saveGuestMode(boolean isGuest) {
+        return localDataSource.saveGuestMode(isGuest);
+    }
+
+    @Override
+    public Single<Boolean> isGuestMode() {
+        return localDataSource.isGuestMode();
+    }
+
+    @Override
     public Completable logout() {
         return localDataSource.clearUserSession();
     }

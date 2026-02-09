@@ -8,5 +8,9 @@ public interface UserLocalDataSource {
 
     Single<Boolean> isUserRemembered();
 
+    Completable saveGuestMode(boolean isGuest);
+
+    Single<Boolean> isGuestMode();
+
     Completable clearUserSession();
 }

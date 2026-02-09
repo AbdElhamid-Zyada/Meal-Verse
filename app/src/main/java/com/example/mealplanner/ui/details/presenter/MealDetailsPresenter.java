@@ -21,12 +21,15 @@ public class MealDetailsPresenter implements MealDetailsContract.Presenter {
 
     private final MealDetailsContract.View view;
     private final MealRepository repository;
+    private final com.example.mealplanner.repository.UserRepository userRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private Meal currentMeal;
 
-    public MealDetailsPresenter(MealDetailsContract.View view) {
+    public MealDetailsPresenter(MealDetailsContract.View view,
+            com.example.mealplanner.repository.UserRepository userRepository) {
         this.view = view;
         this.repository = MealRepositoryImpl.getInstance();
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -108,6 +111,21 @@ public class MealDetailsPresenter implements MealDetailsContract.Presenter {
             return;
         }
 
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                view.showMessage("Adding to favorites is not available in guest mode");
+                                return;
+                            }
+                            toggleFavorite();
+                        },
+                        error -> view.showMessage("Error checking guest status")));
+    }
+
+    private void toggleFavorite() {
         boolean newStatus = !currentMeal.isFavorite();
         currentMeal.setFavorite(newStatus);
         view.setFavoriteState(newStatus);
@@ -141,6 +159,21 @@ public class MealDetailsPresenter implements MealDetailsContract.Presenter {
         if (currentMeal == null)
             return;
 
+        disposables.add(userRepository.isGuestMode()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        isGuest -> {
+                            if (isGuest) {
+                                view.showMessage("Adding to weekly plan is not available in guest mode");
+                                return;
+                            }
+                            showDatePicker();
+                        },
+                        error -> view.showMessage("Error checking guest status")));
+    }
+
+    private void showDatePicker() {
         List<Date> availableDates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         for (int i = 0; i < 7; i++) {
