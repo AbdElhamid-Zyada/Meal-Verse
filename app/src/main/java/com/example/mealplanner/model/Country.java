@@ -2,18 +2,18 @@ package com.example.mealplanner.model;
 
 public class Country {
     private String name;
-    private int imageResource;
+    private String flagUrl; // For API data
 
-    public Country(String name, int imageResource) {
+    public Country(String name, String flagUrl) {
         this.name = name;
-        this.imageResource = imageResource;
+        this.flagUrl = flagUrl;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getImageResource() {
-        return imageResource;
+    public String getFlagUrl() {
+        return flagUrl;
     }
 }

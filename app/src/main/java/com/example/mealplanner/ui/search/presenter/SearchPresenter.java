@@ -16,12 +16,16 @@ import java.util.Map;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+
+import java.util.concurrent.TimeUnit;
 
 public class SearchPresenter implements SearchContract.Presenter {
 
     private final SearchContract.View view;
     private final MealRepository repository;
     private final CompositeDisposable disposables = new CompositeDisposable();
+    private final PublishSubject<String> searchSubject = PublishSubject.create();
 
     private String currentQuery = "";
     private final Map<FilterType, String> activeFilters = new HashMap<>();
@@ -29,18 +33,36 @@ public class SearchPresenter implements SearchContract.Presenter {
     public SearchPresenter(SearchContract.View view) {
         this.view = view;
         this.repository = MealRepositoryImpl.getInstance();
-        loadInitialData(); // Initial search with empty query
+        setupDebouncedSearch();
     }
 
-    private void loadInitialData() {
+    private void setupDebouncedSearch() {
+        disposables.add(
+                searchSubject
+                        .debounce(300, TimeUnit.MILLISECONDS)
+                        .distinctUntilChanged()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                query -> {
+                                    this.currentQuery = query;
+                                    performSearch();
+                                },
+                                throwable -> view.showMessage("Search error: " + throwable.getMessage())));
+    }
+
+    @Override
+    public void init() {
         performSearch();
     }
 
     @Override
     public void search(String query) {
-        this.currentQuery = query;
-        performSearch();
+        // Emit to debounced subject instead of searching immediately
+        searchSubject.onNext(query);
     }
+
+    private io.reactivex.rxjava3.disposables.Disposable searchDisposable;
 
     private void performSearch() {
         String category = activeFilters.get(FilterType.CATEGORY);
@@ -52,7 +74,11 @@ public class SearchPresenter implements SearchContract.Presenter {
                 category, area, ingredient);
         io.reactivex.rxjava3.core.Observable<List<Meal>> favoritesObservable = repository.getFavoriteMeals();
 
-        disposables.add(io.reactivex.rxjava3.core.Observable
+        if (searchDisposable != null && !searchDisposable.isDisposed()) {
+            searchDisposable.dispose();
+        }
+
+        searchDisposable = io.reactivex.rxjava3.core.Observable
                 .combineLatest(searchObservable, favoritesObservable, (searchResults, favorites) -> {
                     // Create a set of favorite IDs for O(1) lookup
                     java.util.Set<String> favoriteIds = new java.util.HashSet<>();
@@ -73,7 +99,9 @@ public class SearchPresenter implements SearchContract.Presenter {
                             view.showSearchResults(meals);
                             view.showResultCount(meals.size());
                         },
-                        throwable -> view.showMessage("Error searching: " + throwable.getMessage())));
+                        throwable -> view.showMessage("Error searching: " + throwable.getMessage()));
+
+        disposables.add(searchDisposable);
     }
 
     @Override

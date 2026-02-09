@@ -37,6 +37,8 @@ public interface SearchContract {
     }
 
     interface Presenter {
+        void init();
+
         void search(String query);
 
         void onFilterClicked(FilterType type);

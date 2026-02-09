@@ -30,17 +30,23 @@ public class MealRepositoryImpl implements MealRepository {
     private MealDao mealDao;
     private com.example.mealplanner.db.PlannedMealDao plannedMealDao;
 
+    // API data sources
+    private com.example.mealplanner.datasource.remote.MealRemoteDataSource remoteDataSource;
+    private com.example.mealplanner.datasource.firestore.FirestoreDataSource firestoreDataSource;
+
     // Disposables for repository internal subscriptions
     private final io.reactivex.rxjava3.disposables.CompositeDisposable disposables = new io.reactivex.rxjava3.disposables.CompositeDisposable();
-
-    private List<Meal> allMockMeals;
 
     private MealRepositoryImpl(Context context) {
         MealDatabase db = MealDatabase.getInstance(context);
         mealDao = db.mealDao();
         plannedMealDao = db.plannedMealDao();
         plannedMeals = new HashMap<>();
-        initializeMockMeals();
+
+        // Initialize API data sources
+        remoteDataSource = new com.example.mealplanner.datasource.remote.MealRemoteDataSourceImpl();
+        firestoreDataSource = new com.example.mealplanner.datasource.firestore.FirestoreDataSourceImpl();
+
         loadPlannedMealsFromDb();
     }
 
@@ -71,40 +77,19 @@ public class MealRepositoryImpl implements MealRepository {
     }
 
     private Meal findMealById(String id) {
-        for (Meal meal : allMockMeals) {
-            if (meal.getId().equals(id)) {
-                return meal;
+        // Try to find in favorites database
+        try {
+            List<Meal> favorites = mealDao.getAllMeals().blockingFirst();
+            for (Meal meal : favorites) {
+                if (meal.getId().equals(id)) {
+                    return meal;
+                }
             }
+        } catch (Exception e) {
+            // If not found in favorites, could fetch from API
+            System.err.println("Error finding meal: " + e.getMessage());
         }
         return null;
-    }
-
-    private void initializeMockMeals() {
-        allMockMeals = new java.util.ArrayList<>();
-
-        List<String> ingredients1 = java.util.Arrays.asList("Chicken", "Rice", "Soy Sauce");
-        allMockMeals.add(new Meal("1", "Chicken Teriyaki", R.drawable.ic_launcher_background, 520, 25, MealType.LUNCH,
-                "Chicken", "Japanese", ingredients1));
-
-        List<String> ingredients2 = java.util.Arrays.asList("Pasta", "Eggs", "Cheese", "Bacon");
-        allMockMeals.add(new Meal("2", "Spaghetti Carbonara", R.drawable.ic_launcher_background, 680, 20,
-                MealType.DINNER, "Pasta", "Italian", ingredients2));
-
-        List<String> ingredients3 = java.util.Arrays.asList("Beef", "Mushrooms", "Pastry");
-        allMockMeals.add(new Meal("3", "Beef Wellington", R.drawable.ic_launcher_background, 800, 60, MealType.DINNER,
-                "Beef", "British", ingredients3));
-
-        List<String> ingredients4 = java.util.Arrays.asList("Rice", "Mushrooms", "Cream");
-        allMockMeals.add(new Meal("4", "Mushroom Risotto", R.drawable.ic_launcher_background, 450, 40, MealType.DINNER,
-                "Fungi", "Italian", ingredients4));
-
-        List<String> ingredients5 = java.util.Arrays.asList("Pork", "Noodles", "Egg", "Broth");
-        allMockMeals.add(new Meal("5", "Tonkotsu Ramen", R.drawable.ic_launcher_background, 600, 120, MealType.LUNCH,
-                "Pork", "Japanese", ingredients5));
-
-        List<String> ingredients6 = java.util.Arrays.asList("Shrimp", "Curry Paste", "Coconut Milk");
-        allMockMeals.add(new Meal("6", "Thai Red Curry", R.drawable.ic_launcher_background, 550, 30, MealType.DINNER,
-                "Seafood", "Thai", ingredients6));
     }
 
     public static void init(Context context) {
@@ -172,119 +157,185 @@ public class MealRepositoryImpl implements MealRepository {
         return mealDao.isFavorite(mealId);
     }
 
-    // Ingredients Implementation (Mock)
+    // Ingredients Implementation (API)
     @Override
     public Observable<List<Ingredient>> getIngredients() {
-        return Observable.fromCallable(this::getMockIngredients);
+        return remoteDataSource.getAllIngredients().toObservable();
     }
 
     @Override
     public Observable<List<Ingredient>> searchIngredients(String query) {
-        return Observable.fromCallable(() -> {
-            List<Ingredient> all = getMockIngredients();
-            List<Ingredient> filtered = new java.util.ArrayList<>();
-            for (Ingredient ingredient : all) {
-                if (ingredient.getName().toLowerCase().contains(query.toLowerCase())) {
-                    filtered.add(ingredient);
-                }
-            }
-            return filtered;
-        });
+        return remoteDataSource.getAllIngredients()
+                .toObservable()
+                .map(ingredients -> {
+                    List<Ingredient> filtered = new java.util.ArrayList<>();
+                    for (Ingredient ingredient : ingredients) {
+                        if (ingredient.getName().toLowerCase().contains(query.toLowerCase())) {
+                            filtered.add(ingredient);
+                        }
+                    }
+                    return filtered;
+                });
     }
 
-    private List<Ingredient> getMockIngredients() {
-        List<Ingredient> ingredients = new java.util.ArrayList<>();
-        ingredients.add(new Ingredient("Chicken", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Beef", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Salmon", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Lamb", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Pork", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Pasta", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Rice", R.drawable.ic_launcher_background));
-        ingredients.add(new Ingredient("Seafood", R.drawable.ic_launcher_background));
-        return ingredients;
-    }
-
-    // Countries Implementation (Mock)
+    // Countries Implementation (API)
     @Override
     public Observable<List<Country>> getCountries() {
-        return Observable.fromCallable(this::getMockCountries);
+        return remoteDataSource.getAllCountries().toObservable();
     }
 
     @Override
     public Observable<List<Country>> searchCountries(String query) {
-        return Observable.fromCallable(() -> {
-            List<Country> all = getMockCountries();
-            List<Country> filtered = new java.util.ArrayList<>();
-            for (Country country : all) {
-                if (country.getName().toLowerCase().contains(query.toLowerCase())) {
-                    filtered.add(country);
-                }
-            }
-            return filtered;
-        });
+        return remoteDataSource.getAllCountries()
+                .toObservable()
+                .map(countries -> {
+                    List<Country> filtered = new java.util.ArrayList<>();
+                    for (Country country : countries) {
+                        if (country.getName().toLowerCase().contains(query.toLowerCase())) {
+                            filtered.add(country);
+                        }
+                    }
+                    return filtered;
+                });
     }
 
-    private List<Country> getMockCountries() {
-        List<Country> countries = new java.util.ArrayList<>();
-        countries.add(new Country("Italian", R.drawable.ic_launcher_background));
-        countries.add(new Country("Mexican", R.drawable.ic_launcher_background));
-        countries.add(new Country("Japanese", R.drawable.ic_launcher_background));
-        countries.add(new Country("American", R.drawable.ic_launcher_background));
-        countries.add(new Country("French", R.drawable.ic_launcher_background));
-        countries.add(new Country("British", R.drawable.ic_launcher_background));
-        countries.add(new Country("Chinese", R.drawable.ic_launcher_background));
-        countries.add(new Country("Thai", R.drawable.ic_launcher_background));
-        return countries;
-    }
-
-    // Search & Filter Implementation
     @Override
     public Observable<List<Meal>> searchMeals(String query, String category, String area, String ingredient) {
-        return Observable.fromCallable(() -> {
-            List<Meal> filtered = new java.util.ArrayList<>();
-            for (Meal meal : allMockMeals) {
-                boolean matchesQuery = query == null || query.isEmpty() ||
-                        meal.getName().toLowerCase().contains(query.toLowerCase()) ||
-                        (meal.getIngredients() != null && meal.getIngredients().stream()
-                                .anyMatch(i -> i.toLowerCase().contains(query.toLowerCase())));
+        if (query != null && !query.isEmpty()) {
+            // Case 1: Search by Name (Returns Full Details)
+            return remoteDataSource.searchMealsByName(query)
+                    .toObservable()
+                    .map(meals -> {
+                        List<Meal> filtered = new java.util.ArrayList<>();
+                        for (Meal meal : meals) {
+                            boolean matchesCategory = category == null || category.isEmpty()
+                                    || (meal.getCategory() != null && meal.getCategory().equalsIgnoreCase(category));
+                            boolean matchesArea = area == null || area.isEmpty()
+                                    || (meal.getArea() != null && meal.getArea().equalsIgnoreCase(area));
+                            boolean matchesIngredient = ingredient == null || ingredient.isEmpty()
+                                    || (meal.getIngredients() != null && meal.getIngredients().contains(ingredient));
 
-                boolean matchesCategory = category == null || category.isEmpty()
-                        || meal.getCategory().equalsIgnoreCase(category);
-                boolean matchesArea = area == null || area.isEmpty() || meal.getArea().equalsIgnoreCase(area);
-                boolean matchesIngredient = ingredient == null || ingredient.isEmpty() ||
-                        (meal.getIngredients() != null && meal.getIngredients().contains(ingredient));
+                            if (matchesCategory && matchesArea && matchesIngredient) {
+                                filtered.add(meal);
+                            }
+                        }
+                        return filtered;
+                    });
+        }
 
-                if (matchesQuery && matchesCategory && matchesArea && matchesIngredient) {
-                    filtered.add(meal);
+        // Case 2: Filter-based Search (Returns Previews - Requires Intersection)
+        List<Single<List<Meal>>> sources = new java.util.ArrayList<>();
+        if (category != null && !category.isEmpty()) {
+            sources.add(remoteDataSource.filterByCategory(category)
+                    .map(meals -> {
+                        for (Meal meal : meals) {
+                            meal.setCategory(category);
+                        }
+                        return meals;
+                    }));
+        }
+        if (area != null && !area.isEmpty()) {
+            sources.add(remoteDataSource.filterByArea(area)
+                    .map(meals -> {
+                        for (Meal meal : meals) {
+                            meal.setArea(area);
+                        }
+                        return meals;
+                    }));
+        }
+        if (ingredient != null && !ingredient.isEmpty()) {
+            sources.add(remoteDataSource.filterByIngredient(ingredient));
+        }
+
+        if (sources.isEmpty()) {
+            // Case 3: No Filters, No Query -> Default Search (Returns valid meals with Full
+            // Details)
+            // Iterate 'a' through 'z' to get maximum meals (API limit workaround)
+            // This is heavy (~26 calls) but ensures "All Meals" are shown.
+            return io.reactivex.rxjava3.core.Observable.range('a', 26)
+                    .map(c -> String.valueOf((char) c.intValue()))
+                    .flatMap(letter -> remoteDataSource.searchMealsByFirstLetter(letter)
+                            .toObservable()
+                            .onErrorResumeNext(
+                                    t -> io.reactivex.rxjava3.core.Observable.just(new java.util.ArrayList<Meal>())))
+                    .reduce((List<Meal>) new java.util.ArrayList<Meal>(), (allMeals, letterMeals) -> {
+                        allMeals.addAll(letterMeals);
+                        return allMeals;
+                    })
+                    .toObservable();
+        }
+
+        // Intersect results from multiple filters
+        return Single.zip(sources, args -> {
+            // Start with the first list
+            List<Meal> result = (List<Meal>) args[0];
+
+            // Intersect with remaining lists
+            for (int i = 1; i < args.length; i++) {
+                List<Meal> nextList = (List<Meal>) args[i];
+                // Create set of IDs from nextList for fast lookup
+                java.util.Set<String> nextIds = new java.util.HashSet<>();
+                for (Meal m : nextList) {
+                    nextIds.add(m.getId());
                 }
+
+                // Keep only meals in result that are also in nextIds
+                List<Meal> intersection = new java.util.ArrayList<>();
+                for (Meal m : result) {
+                    if (nextIds.contains(m.getId())) {
+                        intersection.add(m);
+                    }
+                }
+                result = intersection;
             }
-            return filtered;
-        });
+            return result;
+        })
+                .flatMap(meals -> {
+                    if (meals.isEmpty())
+                        return Single.just(new java.util.ArrayList<Meal>());
+                    return Observable.fromIterable(meals)
+                            .flatMapSingle(m -> remoteDataSource.getMealById(m.getId()))
+                            .toList();
+                })
+                .toObservable();
     }
 
     @Override
     public Observable<List<String>> getFilterOptions(FilterType type) {
-        return Observable.fromCallable(() -> {
-            java.util.Set<String> options = new java.util.HashSet<>();
-            for (Meal meal : allMockMeals) {
-                switch (type) {
-                    case CATEGORY:
-                        if (meal.getCategory() != null)
-                            options.add(meal.getCategory());
-                        break;
-                    case AREA:
-                        if (meal.getArea() != null)
-                            options.add(meal.getArea());
-                        break;
-                    case INGREDIENT:
-                        if (meal.getIngredients() != null)
-                            options.addAll(meal.getIngredients());
-                        break;
-                }
-            }
-            return new java.util.ArrayList<>(options);
-        });
+        switch (type) {
+            case CATEGORY:
+                return remoteDataSource.getCategories()
+                        .toObservable()
+                        .map(categories -> {
+                            List<String> names = new java.util.ArrayList<>();
+                            for (com.example.mealplanner.model.Category category : categories) {
+                                names.add(category.getName());
+                            }
+                            return names;
+                        });
+            case AREA:
+                return remoteDataSource.getAllCountries()
+                        .toObservable()
+                        .map(countries -> {
+                            List<String> names = new java.util.ArrayList<>();
+                            for (com.example.mealplanner.model.Country country : countries) {
+                                names.add(country.getName());
+                            }
+                            return names;
+                        });
+            case INGREDIENT:
+                return remoteDataSource.getAllIngredients()
+                        .toObservable()
+                        .map(ingredients -> {
+                            List<String> names = new java.util.ArrayList<>();
+                            for (com.example.mealplanner.model.Ingredient ingredient : ingredients) {
+                                names.add(ingredient.getName());
+                            }
+                            return names;
+                        });
+            default:
+                return Observable.just(new java.util.ArrayList<>());
+        }
     }
 
     @Override
@@ -304,29 +355,33 @@ public class MealRepositoryImpl implements MealRepository {
 
     @Override
     public Single<Meal> getMealDetails(String mealId) {
-        return Single.fromCallable(() -> {
-            // 1. Try to find in cache/mock list first
-            Meal found = findMealById(mealId);
+        // Try API first, fallback to mock if needed
+        // Try API first
+        return remoteDataSource.getMealById(mealId);
+    }
 
-            // 2. If found, ensure it has detailed info (enrich it if it's a basic mock)
-            if (found != null) {
-                if (found.getInstructions() == null) {
-                    found.setInstructions(
-                            "Prepare the brown rice according to the package instructions. Keep warm once cooked..Season the salmon with salt, pepper, and a dash of olive oil. Sear on high heat for 3 minutes per side until caramelized..Slice the avocado and carrots into thin matchsticks or strips for presentation..Assemble the bowl by placing rice at the bottom, topped with salmon, vegetables, and edamame.");
-                }
-                if (found.getYoutubeUrl() == null) {
-                    found.setYoutubeUrl("https://www.youtube.com/watch?v=HuWd4v998OA"); // Example ID
-                }
-                if (found.getMeasures() == null) {
-                    List<String> measures = new java.util.ArrayList<>();
-                    for (int i = 0; i < (found.getIngredients() != null ? found.getIngredients().size() : 0); i++) {
-                        measures.add("1 cup"); // Dummy measure
-                    }
-                    found.setMeasures(measures);
-                }
-                return found;
-            }
-            throw new Exception("Meal not found");
-        });
+    // New API methods
+    public Single<Meal> getRandomMeal() {
+        return remoteDataSource.getRandomMeal();
+    }
+
+    public Single<List<Meal>> searchMealsByName(String name) {
+        return remoteDataSource.searchMealsByName(name);
+    }
+
+    public Single<List<com.example.mealplanner.model.Category>> getCategories() {
+        return remoteDataSource.getCategories();
+    }
+
+    public Completable saveMealOfTheDay(String userId, String mealId) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        String date = sdf.format(new Date());
+        return firestoreDataSource.saveMealOfTheDay(userId, mealId, date);
+    }
+
+    public Single<String> getMealOfTheDayId(String userId) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        String date = sdf.format(new Date());
+        return firestoreDataSource.getMealOfTheDayId(userId, date);
     }
 }

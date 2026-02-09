@@ -20,8 +20,7 @@
             android:layout_height="match_parent"
             android:padding="24dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_restaurant_menu"
-            app:tint="@color/primary_dark" />
+            android:src="@drawable/ic_restaurant_menu" />
 
             <!-- Note: using ic_restaurant_menu/tint as placeholder since I don't have ingredient drawables yet.
                  In real app, src would be set dynamically and no tint for color images. -->

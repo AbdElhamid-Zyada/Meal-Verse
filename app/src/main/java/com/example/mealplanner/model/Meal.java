@@ -11,6 +11,7 @@ public class Meal implements Serializable {
     private String id;
     private String name;
     private int imageResId; // Using resource ID for mock data, normally would be URL
+    private String imageUrl; // For API data
     private int calories;
     private int preparationTimeMinutes;
     private String category;
@@ -89,6 +90,14 @@ public class Meal implements Serializable {
 
     public void setImageResId(int imageResId) {
         this.imageResId = imageResId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void setCalories(int calories) {

@@ -104,10 +104,20 @@ public class MealDetailsFragment extends Fragment implements MealDetailsContract
         rvInstructions.setAdapter(instructionsAdapter);
 
         // Load Data
-        String loadId = (getArguments() != null && getArguments().getString("ARG_MEAL_ID") != null)
-                ? getArguments().getString("ARG_MEAL_ID")
-                : "1";
-        presenter.loadMealDetails(loadId);
+        String mealId = null;
+        if (getArguments() != null) {
+            // Try both possible argument keys
+            mealId = getArguments().getString("mealId");
+            if (mealId == null) {
+                mealId = getArguments().getString("ARG_MEAL_ID");
+            }
+        }
+
+        if (mealId != null) {
+            presenter.loadMealDetails(mealId);
+        } else {
+            showMessage("No meal ID provided");
+        }
     }
 
     @Override
@@ -119,7 +129,19 @@ public class MealDetailsFragment extends Fragment implements MealDetailsContract
     @Override
     public void showMealDetails(Meal meal) {
         tvTitle.setText(meal.getName());
-        ivMealImage.setImageResource(meal.getImageResId());
+
+        // Load meal image with Glide
+        if (meal.getImageUrl() != null && !meal.getImageUrl().isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(meal.getImageUrl())
+                    .placeholder(R.drawable.login_hero_image)
+                    .error(R.drawable.login_hero_image)
+                    .centerCrop()
+                    .into(ivMealImage);
+        } else {
+            ivMealImage.setImageResource(R.drawable.login_hero_image);
+        }
+
         chipArea.setText(meal.getArea() != null ? meal.getArea() : "Global");
         chipCategory.setText(meal.getCategory() != null ? meal.getCategory() : "Misc");
 
@@ -221,6 +243,21 @@ public class MealDetailsFragment extends Fragment implements MealDetailsContract
 
             holder.tvName.setText(name);
             holder.tvMeasure.setText(measure);
+
+            // Load ingredient thumbnail with Glide
+            if (name != null && !name.isEmpty()) {
+                String imageUrl = "https://www.themealdb.com/images/ingredients/"
+                        + name + "-Small.png";
+
+                com.bumptech.glide.Glide.with(MealDetailsFragment.this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_restaurant_menu)
+                        .error(R.drawable.ic_restaurant_menu)
+                        .centerCrop()
+                        .into(holder.ivImage);
+            } else {
+                holder.ivImage.setImageResource(R.drawable.ic_restaurant_menu);
+            }
         }
 
         @Override

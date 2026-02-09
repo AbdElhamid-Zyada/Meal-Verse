@@ -138,7 +138,17 @@ public class CountriesFragment extends Fragment implements CountriesContract.Vie
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Country country = countries.get(position);
             holder.tvName.setText(country.getName());
-            holder.ivImage.setImageResource(country.getImageResource());
+
+            // Use Glide to load flag image from URL
+            if (country.getFlagUrl() != null && !country.getFlagUrl().isEmpty()) {
+                com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                        .load(country.getFlagUrl())
+                        .placeholder(R.drawable.ic_restaurant_menu)
+                        .error(R.drawable.ic_restaurant_menu)
+                        .into(holder.ivImage);
+            } else {
+                holder.ivImage.setImageResource(R.drawable.ic_restaurant_menu);
+            }
 
             holder.itemView.setOnClickListener(v -> presenter.onCountryClicked(country));
         }

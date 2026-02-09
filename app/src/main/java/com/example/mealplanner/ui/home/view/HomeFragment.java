@@ -14,11 +14,14 @@ import androidx.fragment.app.Fragment;
 import com.example.mealplanner.R;
 import com.example.mealplanner.model.Country;
 import com.example.mealplanner.model.Ingredient;
+import com.example.mealplanner.model.Meal;
 import com.example.mealplanner.ui.home.presenter.HomeContract;
 import com.example.mealplanner.ui.home.presenter.HomePresenter;
+import com.example.mealplanner.utils.CountryFlagMapper;
 
 import java.util.List;
 import androidx.navigation.Navigation;
+import android.widget.Toast;
 
 public class HomeFragment extends Fragment implements HomeContract.View {
 
@@ -55,8 +58,14 @@ public class HomeFragment extends Fragment implements HomeContract.View {
                                 .setOnClickListener(v -> presenter.onBrowseAllIngredientsClicked());
 
                 // Suggested Meals Click
-                view.findViewById(R.id.suggested_meal_1).setOnClickListener(v -> presenter.onSuggestedMealClicked());
-                view.findViewById(R.id.suggested_meal_2).setOnClickListener(v -> presenter.onSuggestedMealClicked());
+                // Meal of the Day click
+                view.findViewById(R.id.card_meal_of_day).setOnClickListener(v -> {
+                        if (currentMealOfTheDay != null) {
+                                presenter.onMealOfTheDayCardClicked(currentMealOfTheDay);
+                        }
+                });
+
+                // Suggested meals clicks - will be set in displaySuggestedMeals
         }
 
         @Override
@@ -71,8 +80,10 @@ public class HomeFragment extends Fragment implements HomeContract.View {
         }
 
         @Override
-        public void navigateToMealDetails() {
-                Navigation.findNavController(root).navigate(R.id.action_homeFragment_to_mealDetailsFragment);
+        public void navigateToMealDetails(String mealId) {
+                Bundle args = new Bundle();
+                args.putString("mealId", mealId);
+                Navigation.findNavController(root).navigate(R.id.action_homeFragment_to_mealDetailsFragment, args);
         }
 
         @Override
@@ -100,7 +111,16 @@ public class HomeFragment extends Fragment implements HomeContract.View {
                                 ImageView iv = container.findViewWithTag("country_image");
                                 if (tv != null)
                                         tv.setText(countries.get(i).getName());
-                                // Image setting excluded for brevity as we use launcher background
+
+                                if (iv != null) {
+                                        String flagUrl = CountryFlagMapper.getFlagUrl(countries.get(i).getName());
+                                        com.bumptech.glide.Glide.with(this)
+                                                        .load(flagUrl)
+                                                        .placeholder(R.drawable.ic_launcher_background)
+                                                        .error(R.drawable.ic_launcher_background)
+                                                        .centerCrop()
+                                                        .into(iv);
+                                }
                         }
                 }
         }
@@ -117,9 +137,133 @@ public class HomeFragment extends Fragment implements HomeContract.View {
                         if (container != null) {
                                 TextView tv = container.findViewWithTag("ingredient_name");
                                 ImageView iv = container.findViewWithTag("ingredient_image");
-                                if (tv != null)
-                                        tv.setText(ingredients.get(i).getName());
+
+                                Ingredient ingredient = ingredients.get(i);
+
+                                if (tv != null) {
+                                        tv.setText(ingredient.getName());
+                                }
+
+                                if (iv != null) {
+                                        // TheMealDB ingredient thumbnail URL pattern
+                                        String imageUrl = "https://www.themealdb.com/images/ingredients/"
+                                                        + ingredient.getName() + "-Small.png";
+
+                                        com.bumptech.glide.Glide.with(this)
+                                                        .load(imageUrl)
+                                                        .placeholder(R.drawable.ic_restaurant_menu)
+                                                        .error(R.drawable.ic_restaurant_menu)
+                                                        .into(iv);
+                                }
                         }
+                }
+        }
+
+        // Store current meal for click handling
+        private Meal currentMealOfTheDay;
+
+        @Override
+        public void showLoading() {
+                // Optional: show loading indicator
+        }
+
+        @Override
+        public void hideLoading() {
+                // Optional: hide loading indicator
+        }
+
+        @Override
+        public void displayMealOfTheDay(Meal meal) {
+                if (meal == null)
+                        return;
+
+                // Store for click handling
+                this.currentMealOfTheDay = meal;
+
+                // Update meal of the day card
+                TextView tvMealName = root.findViewById(R.id.tv_meal_of_day_name);
+                TextView tvMealCategory = root.findViewById(R.id.tv_meal_of_day_category);
+                ImageView ivMealImage = root.findViewById(R.id.iv_meal_of_day);
+
+                if (tvMealName != null) {
+                        tvMealName.setText(meal.getName());
+                }
+                if (tvMealCategory != null) {
+                        // Display category and area
+                        String categoryText = meal.getCategory();
+                        if (meal.getArea() != null && !meal.getArea().isEmpty()) {
+                                categoryText += " • " + meal.getArea();
+                        }
+                        tvMealCategory.setText(categoryText);
+                }
+                if (ivMealImage != null && meal.getImageUrl() != null && !meal.getImageUrl().isEmpty()) {
+                        com.bumptech.glide.Glide.with(this)
+                                        .load(meal.getImageUrl())
+                                        .placeholder(R.drawable.login_hero_image)
+                                        .error(R.drawable.login_hero_image)
+                                        .centerCrop()
+                                        .into(ivMealImage);
+                }
+        }
+
+        @Override
+        public void showMealOfTheDayError(String message) {
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void displaySuggestedMeals(java.util.List<Meal> meals) {
+                if (meals == null || meals.size() < 2)
+                        return;
+
+                // Update suggested meal 1
+                View meal1View = root.findViewById(R.id.suggested_meal_1);
+                if (meal1View != null) {
+                        updateSuggestedMealView(meal1View, meals.get(0));
+                }
+
+                // Update suggested meal 2
+                View meal2View = root.findViewById(R.id.suggested_meal_2);
+                if (meal2View != null) {
+                        updateSuggestedMealView(meal2View, meals.get(1));
+                }
+        }
+
+        private void updateSuggestedMealView(View view, Meal meal) {
+                ImageView ivImage = view.findViewById(R.id.iv_recipe_image);
+                TextView tvTitle = view.findViewById(R.id.tv_recipe_title);
+                TextView tvDetails = view.findViewById(R.id.tv_recipe_details);
+
+                if (tvTitle != null) {
+                        tvTitle.setText(meal.getName());
+                }
+
+                if (tvDetails != null) {
+                        String details = meal.getCategory();
+                        if (meal.getArea() != null && !meal.getArea().isEmpty()) {
+                                details += " • " + meal.getArea();
+                        }
+                        tvDetails.setText(details);
+                }
+
+                if (ivImage != null && meal.getImageUrl() != null) {
+                        com.bumptech.glide.Glide.with(this)
+                                        .load(meal.getImageUrl())
+                                        .placeholder(R.drawable.login_hero_image)
+                                        .error(R.drawable.login_hero_image)
+                                        .centerCrop()
+                                        .into(ivImage);
+                }
+
+                // Set click listener
+                view.setOnClickListener(v -> presenter.onSuggestedMealClicked(meal));
+        }
+
+        @Override
+        public void onDestroyView() {
+                super.onDestroyView();
+                if (presenter != null) {
+                        presenter.onDestroy();
                 }
         }
 }

@@ -32,7 +32,13 @@ rxjava = { group = "io.reactivex.rxjava3", name = "rxjava", version = "3.1.8" }
 rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version = "3.0.2" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version = "21.3.0" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version = "2.9.0" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "2.9.0" }
+retrofit-adapter-rxjava3 = { group = "com.squareup.retrofit2", name = "adapter-rxjava3", version = "2.9.0" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.16.0" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version = "4.16.0" }
 
 
 [plugins]

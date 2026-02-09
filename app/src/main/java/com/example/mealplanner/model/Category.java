@@ -1,17 +1,16 @@
 package com.example.mealplanner.model;
 
-public class Ingredient {
+public class Category {
     private String id;
     private String name;
-
+    private String thumbnailUrl;
     private String description;
-    private String type;
 
-    public Ingredient(String id, String name, String description, String type) {
+    public Category(String id, String name, String thumbnailUrl, String description) {
         this.id = id;
         this.name = name;
+        this.thumbnailUrl = thumbnailUrl;
         this.description = description;
-        this.type = type;
     }
 
     public String getId() {
@@ -22,11 +21,11 @@ public class Ingredient {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
-    public String getType() {
-        return type;
+    public String getDescription() {
+        return description;
     }
 }

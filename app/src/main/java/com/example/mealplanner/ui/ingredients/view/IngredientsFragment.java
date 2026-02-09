@@ -138,7 +138,16 @@ public class IngredientsFragment extends Fragment implements IngredientsContract
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Ingredient ingredient = ingredients.get(position);
             holder.tvName.setText(ingredient.getName());
-            holder.ivImage.setImageResource(ingredient.getImageResource());
+
+            // Load ingredient thumbnail from TheMealDB API
+            String imageUrl = "https://www.themealdb.com/images/ingredients/"
+                    + ingredient.getName() + "-Small.png";
+
+            com.bumptech.glide.Glide.with(IngredientsFragment.this)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_restaurant_menu)
+                    .error(R.drawable.ic_restaurant_menu)
+                    .into(holder.ivImage);
 
             holder.itemView.setOnClickListener(v -> presenter.onIngredientClicked(ingredient));
         }

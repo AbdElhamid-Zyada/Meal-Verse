@@ -111,7 +111,11 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             String value = getArguments().getString(ARG_FILTER_VALUE);
             if (type != null && value != null) {
                 presenter.onOptionSelected(value, type);
+            } else {
+                presenter.init();
             }
+        } else {
+            presenter.init();
         }
     }
 
@@ -296,9 +300,29 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Meal meal = meals.get(position);
             holder.tvName.setText(meal.getName());
-            holder.tvDetails.setText((meal.getArea() != null ? meal.getArea() : "Unknown") + " • "
-                    + (meal.getCategory() != null ? meal.getCategory() : "Miscellaneous"));
-            holder.ivImage.setImageResource(meal.getImageResId());
+            String area = meal.getArea();
+            String category = meal.getCategory();
+            String details = "";
+            if (area != null && !area.isEmpty())
+                details += area;
+            if (category != null && !category.isEmpty()) {
+                if (!details.isEmpty())
+                    details += " • ";
+                details += category;
+            }
+            holder.tvDetails.setText(details);
+
+            // Load meal image with Glide
+            if (meal.getImageUrl() != null && !meal.getImageUrl().isEmpty()) {
+                com.bumptech.glide.Glide.with(SearchFragment.this)
+                        .load(meal.getImageUrl())
+                        .placeholder(R.drawable.login_hero_image)
+                        .error(R.drawable.login_hero_image)
+                        .centerCrop()
+                        .into(holder.ivImage);
+            } else {
+                holder.ivImage.setImageResource(R.drawable.login_hero_image);
+            }
 
             if (meal.isFavorite()) {
                 holder.btnFavorite.setImageResource(R.drawable.ic_favorite);
