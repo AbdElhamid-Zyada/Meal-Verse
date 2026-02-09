@@ -28,4 +28,10 @@ public interface MealDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM meals WHERE id = :id)")
     Single<Boolean> isFavorite(String id);
+
+    @Query("SELECT * FROM meals WHERE id = :mealId LIMIT 1")
+    Single<Meal> getMealById(String mealId);
+
+    @Query("DELETE FROM meals")
+    Completable deleteAllMeals();
 }

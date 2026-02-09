@@ -25,6 +25,7 @@ public class SplashFragment extends Fragment {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     private com.example.mealplanner.repository.UserRepository userRepository;
+    private com.example.mealplanner.repository.MealRepository mealRepository;
 
     @Nullable
     @Override
@@ -38,6 +39,7 @@ public class SplashFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         userRepository = UserRepositoryImpl.getInstance(requireContext());
+        mealRepository = com.example.mealplanner.repository.MealRepositoryImpl.getInstance();
 
         // Navigate to home after 2.5 seconds
         view.findViewById(R.id.iv_logo).animate().rotation(360f).setDuration(1000).start();
@@ -49,23 +51,68 @@ public class SplashFragment extends Fragment {
     }
 
     private void checkUserSession(View view) {
+        System.out.println("[SPLASH] Checking user session...");
         disposables.add(userRepository.isUserRemembered()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         isRemembered -> {
                             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                            System.out.println("[SPLASH] isUserRemembered: " + isRemembered);
+                            System.out.println("[SPLASH] Firebase currentUser: "
+                                    + (currentUser != null ? currentUser.getUid() : "null"));
+
                             if (isRemembered && currentUser != null) {
-                                Navigation.findNavController(view).navigate(R.id.action_splashFragment_to_homeFragment);
+                                System.out.println("[SPLASH] User is logged in, starting sync...");
+                                // Sync data from Firestore before navigating to home
+                                syncDataFromFirestore(view, currentUser.getUid());
                             } else {
+                                System.out.println("[SPLASH] User not logged in, navigating to login");
                                 Navigation.findNavController(view)
                                         .navigate(R.id.action_splashFragment_to_loginFragment);
                             }
                         },
                         throwable -> {
                             // Fallback to login on error
+                            System.err.println("[SPLASH ERROR] Error checking user session: " + throwable.getMessage());
+                            throwable.printStackTrace();
                             Navigation.findNavController(view).navigate(R.id.action_splashFragment_to_loginFragment);
                         }));
+    }
+
+    private void syncDataFromFirestore(View view, String userId) {
+        System.out.println("[SPLASH] Starting Firestore sync for user: " + userId);
+        // Sync saved meals and planned meals from Firestore
+        disposables.add(
+                mealRepository.syncSavedMealsFromFirestore(userId)
+                        .doOnComplete(() -> System.out.println("[SPLASH] Saved meals sync completed"))
+                        .doOnError(error -> System.err
+                                .println("[SPLASH ERROR] Saved meals sync failed: " + error.getMessage()))
+                        .andThen(mealRepository.syncPlannedMealsFromFirestore(userId))
+                        .doOnComplete(() -> System.out.println("[SPLASH] Planned meals sync completed"))
+                        .doOnError(error -> System.err
+                                .println("[SPLASH ERROR] Planned meals sync failed: " + error.getMessage()))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                () -> {
+                                    // Sync complete, navigate to home
+                                    System.out.println("[SPLASH] All sync completed successfully, navigating to home");
+                                    if (isAdded()) {
+                                        Navigation.findNavController(view)
+                                                .navigate(R.id.action_splashFragment_to_homeFragment);
+                                    }
+                                },
+                                throwable -> {
+                                    // Even if sync fails, navigate to home (local data is still available)
+                                    System.err.println(
+                                            "[SPLASH ERROR] Error syncing from Firestore: " + throwable.getMessage());
+                                    throwable.printStackTrace();
+                                    if (isAdded()) {
+                                        Navigation.findNavController(view)
+                                                .navigate(R.id.action_splashFragment_to_homeFragment);
+                                    }
+                                }));
     }
 
     @Override

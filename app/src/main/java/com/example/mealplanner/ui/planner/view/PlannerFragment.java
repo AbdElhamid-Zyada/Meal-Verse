@@ -100,8 +100,12 @@ public class PlannerFragment extends Fragment implements PlannerContract.View {
         View btnDelete = mealView.findViewById(R.id.btn_delete_meal);
 
         tvName.setText(meal.getName());
-        tvInfo.setText(meal.getPreparationTimeMinutes() + " mins • " + meal.getCalories() + " kcal");
-        ivImage.setImageResource(meal.getImageResId());
+        tvInfo.setText(meal.getCategory() + " • " + meal.getArea());
+        com.bumptech.glide.Glide.with(this)
+                .load(meal.getImageUrl())
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .into(ivImage);
 
         btnDelete.setOnClickListener(v -> presenter.deleteMeal(type));
         mealView.setOnClickListener(v -> presenter.onMealClicked(meal));

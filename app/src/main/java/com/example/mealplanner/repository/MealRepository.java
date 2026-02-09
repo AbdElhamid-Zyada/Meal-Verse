@@ -48,4 +48,12 @@ public interface MealRepository {
 
     // Details method
     Single<Meal> getMealDetails(String mealId);
+
+    // Firestore Sync methods
+    Completable syncSavedMealsFromFirestore(String userId);
+
+    Completable syncPlannedMealsFromFirestore(String userId);
+
+    // Clear all user data (for logout)
+    Completable clearAllUserData();
 }

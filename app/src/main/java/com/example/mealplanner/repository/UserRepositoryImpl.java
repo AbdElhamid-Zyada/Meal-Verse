@@ -12,9 +12,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     private static UserRepositoryImpl instance;
     private final UserLocalDataSource localDataSource;
+    private final Context context;
 
     private UserRepositoryImpl(Context context) {
-        this.localDataSource = new UserLocalDataSourceImpl(context);
+        this.context = context.getApplicationContext();
+        this.localDataSource = new UserLocalDataSourceImpl(this.context);
     }
 
     public static synchronized UserRepositoryImpl getInstance(Context context) {
@@ -56,6 +58,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Completable logout() {
-        return localDataSource.clearUserSession();
+        // Clear all meal data from Room database before clearing user session
+        MealRepository mealRepository = MealRepositoryImpl.getInstance();
+        return mealRepository.clearAllUserData()
+                .andThen(localDataSource.clearUserSession());
     }
 }

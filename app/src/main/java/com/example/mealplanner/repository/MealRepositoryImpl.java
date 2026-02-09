@@ -114,16 +114,32 @@ public class MealRepositoryImpl implements MealRepository {
     @Override
     public void deleteMeal(Date date, MealType type) {
         String dateKey = getDateKey(date);
+        Meal mealToDelete = null;
+
         if (plannedMeals.containsKey(dateKey)) {
             Map<MealType, Meal> dayMeals = plannedMeals.get(dateKey);
             if (dayMeals != null) {
+                mealToDelete = dayMeals.get(type);
                 dayMeals.remove(type);
             }
         }
 
+        final Meal finalMealToDelete = mealToDelete;
+
         // Remove from DB
         disposables.add(plannedMealDao.deletePlannedMeal(date, type)
                 .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .andThen(Completable.defer(() -> {
+                    // Sync to Firestore if user is authenticated
+                    com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth
+                            .getInstance().getCurrentUser();
+                    if (currentUser != null && finalMealToDelete != null) {
+                        return firestoreDataSource
+                                .removePlannedMeal(currentUser.getUid(), finalMealToDelete.getId(), date, type)
+                                .onErrorComplete(); // Don't fail local operation if Firestore fails
+                    }
+                    return Completable.complete();
+                }))
                 .subscribe(
                         () -> {
                         },
@@ -144,12 +160,32 @@ public class MealRepositoryImpl implements MealRepository {
 
     @Override
     public Completable addFavorite(Meal meal) {
-        return mealDao.insertMeal(meal);
+        return mealDao.insertMeal(meal)
+                .andThen(Completable.defer(() -> {
+                    // Sync to Firestore if user is authenticated
+                    com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth
+                            .getInstance().getCurrentUser();
+                    if (currentUser != null) {
+                        return firestoreDataSource.saveFavoriteMeal(currentUser.getUid(), meal.getId())
+                                .onErrorComplete(); // Don't fail local operation if Firestore fails
+                    }
+                    return Completable.complete();
+                }));
     }
 
     @Override
     public Completable removeFavorite(Meal meal) {
-        return mealDao.deleteMeal(meal);
+        return mealDao.deleteMeal(meal)
+                .andThen(Completable.defer(() -> {
+                    // Sync to Firestore if user is authenticated
+                    com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth
+                            .getInstance().getCurrentUser();
+                    if (currentUser != null) {
+                        return firestoreDataSource.removeFavoriteMeal(currentUser.getUid(), meal.getId())
+                                .onErrorComplete(); // Don't fail local operation if Firestore fails
+                    }
+                    return Completable.complete();
+                }));
     }
 
     @Override
@@ -350,14 +386,42 @@ public class MealRepositoryImpl implements MealRepository {
         }).andThen(
                 // Update DB
                 plannedMealDao
-                        .insertPlannedMeal(new com.example.mealplanner.model.PlannedMeal(meal.getId(), date, type)));
+                        .insertPlannedMeal(new com.example.mealplanner.model.PlannedMeal(meal.getId(), date, type)))
+                .andThen(Completable.defer(() -> {
+                    // Sync to Firestore if user is authenticated
+                    com.google.firebase.auth.FirebaseUser currentUser = com.google.firebase.auth.FirebaseAuth
+                            .getInstance().getCurrentUser();
+                    if (currentUser != null) {
+                        return firestoreDataSource.savePlannedMeal(currentUser.getUid(), meal.getId(), date, type)
+                                .onErrorComplete(); // Don't fail local operation if Firestore fails
+                    }
+                    return Completable.complete();
+                }));
     }
 
     @Override
     public Single<Meal> getMealDetails(String mealId) {
-        // Try API first, fallback to mock if needed
-        // Try API first
-        return remoteDataSource.getMealById(mealId);
+        System.out.println("[OFFLINE] Attempting to load meal: " + mealId);
+
+        // Try local database first (offline-first pattern)
+        return mealDao.getMealById(mealId)
+                .doOnSuccess(meal -> System.out.println("[OFFLINE] ✅ Loaded from Room: " + meal.getName()))
+                .onErrorResumeNext(error -> {
+                    // If not in local DB, try API
+                    System.out.println("[OFFLINE] Not in Room, fetching from API");
+                    return remoteDataSource.getMealById(mealId)
+                            .doOnSuccess(meal -> {
+                                System.out.println("[OFFLINE] ✅ Loaded from API: " + meal.getName());
+                                // Save to Room for future offline access
+                                mealDao.insertMeal(meal)
+                                        .subscribe(
+                                                () -> System.out.println("[OFFLINE] Cached meal for offline use"),
+                                                cacheError -> System.err.println(
+                                                        "[OFFLINE] Failed to cache: " + cacheError.getMessage()));
+                            })
+                            .doOnError(apiError -> System.err
+                                    .println("[OFFLINE ERROR] ❌ API fetch failed: " + apiError.getMessage()));
+                });
     }
 
     // New API methods
@@ -384,4 +448,131 @@ public class MealRepositoryImpl implements MealRepository {
         String date = sdf.format(new Date());
         return firestoreDataSource.getMealOfTheDayId(userId, date);
     }
+
+    @Override
+    public Completable syncSavedMealsFromFirestore(String userId) {
+        System.out.println("[SYNC] Starting syncSavedMealsFromFirestore for user: " + userId);
+        return firestoreDataSource.getFavoriteMealIds(userId)
+                .doOnSuccess(mealIds -> System.out
+                        .println("[SYNC] Retrieved " + mealIds.size() + " saved meal IDs from Firestore"))
+                .doOnError(error -> System.err.println("[SYNC ERROR] Failed to get meal IDs: " + error.getMessage()))
+                .flatMapCompletable(mealIds -> {
+                    if (mealIds.isEmpty()) {
+                        System.out.println("[SYNC] No saved meals to sync");
+                        return Completable.complete();
+                    }
+
+                    System.out.println("[SYNC] Fetching details for " + mealIds.size() + " meals from API");
+                    // Fetch full details for each meal ID from API and save to Room
+                    return Observable.fromIterable(mealIds)
+                            .doOnNext(mealId -> System.out.println("[SYNC] Fetching meal: " + mealId))
+                            .flatMapSingle(mealId -> remoteDataSource.getMealById(mealId)
+                                    .doOnSuccess(meal -> System.out.println("[SYNC] Fetched meal: " + meal.getName()))
+                                    .doOnError(error -> System.err.println(
+                                            "[SYNC ERROR] Failed to fetch meal " + mealId + ": " + error.getMessage()))
+                                    .onErrorReturnItem(new Meal()) // Skip meals that fail to load
+                    )
+                            .filter(meal -> meal.getId() != null && !meal.getId().isEmpty())
+                            .flatMapCompletable(meal -> {
+                                System.out.println("[SYNC] Saving meal to Room: " + meal.getName());
+                                return mealDao.insertMeal(meal)
+                                        .doOnComplete(() -> System.out
+                                                .println("[SYNC] Successfully saved: " + meal.getName()))
+                                        .doOnError(error -> System.err
+                                                .println("[SYNC ERROR] Failed to save meal: " + error.getMessage()));
+                            });
+                })
+                .doOnComplete(() -> System.out.println("[SYNC] syncSavedMealsFromFirestore completed successfully"))
+                .doOnError(error -> System.err
+                        .println("[SYNC ERROR] syncSavedMealsFromFirestore failed: " + error.getMessage()));
+    }
+
+    @Override
+    public Completable syncPlannedMealsFromFirestore(String userId) {
+        System.out.println("[SYNC] Starting syncPlannedMealsFromFirestore for user: " + userId);
+        // Calculate date range: today + next 6 days
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        Date startDate = calendar.getTime();
+        calendar.add(java.util.Calendar.DAY_OF_YEAR, 6);
+        Date endDate = calendar.getTime();
+
+        System.out.println("[SYNC] Date range: " + startDate + " to " + endDate);
+        return firestoreDataSource.getPlannedMealsForWeek(userId, startDate, endDate)
+                .doOnSuccess(meals -> System.out
+                        .println("[SYNC] Retrieved " + meals.size() + " planned meals from Firestore"))
+                .doOnError(
+                        error -> System.err.println("[SYNC ERROR] Failed to get planned meals: " + error.getMessage()))
+                .flatMapCompletable(plannedMealsFirestore -> {
+                    if (plannedMealsFirestore.isEmpty()) {
+                        System.out.println("[SYNC] No planned meals to sync");
+                        return Completable.complete();
+                    }
+
+                    System.out.println(
+                            "[SYNC] Fetching details for " + plannedMealsFirestore.size() + " planned meals from API");
+                    // Fetch full details for each meal and save to Room
+                    return Observable.fromIterable(plannedMealsFirestore)
+                            .doOnNext(pm -> System.out.println(
+                                    "[SYNC] Fetching planned meal: " + pm.getMealId() + " for " + pm.getDate()))
+                            .flatMapSingle(plannedMeal -> remoteDataSource.getMealById(plannedMeal.getMealId())
+                                    .doOnSuccess(meal -> System.out
+                                            .println("[SYNC] Fetched planned meal: " + meal.getName()))
+                                    .doOnError(error -> System.err.println("[SYNC ERROR] Failed to fetch planned meal "
+                                            + plannedMeal.getMealId() + ": " + error.getMessage()))
+                                    .map(meal -> {
+                                        MealPlannedPair result = new MealPlannedPair();
+                                        result.meal = meal;
+                                        result.plannedMeal = plannedMeal;
+                                        return result;
+                                    })
+                                    .onErrorReturnItem(new MealPlannedPair()))
+                            .filter(pair -> pair.meal != null && pair.meal.getId() != null
+                                    && !pair.meal.getId().isEmpty())
+                            .flatMapCompletable(pair -> {
+                                System.out.println("[SYNC] Saving planned meal to Room: " + pair.meal.getName());
+
+                                // Update in-memory cache
+                                String dateKey = getDateKey(pair.plannedMeal.getDate());
+                                if (!plannedMeals.containsKey(dateKey)) {
+                                    plannedMeals.put(dateKey, new HashMap<>());
+                                }
+                                plannedMeals.get(dateKey).put(pair.plannedMeal.getType(), pair.meal);
+                                System.out.println("[SYNC] Updated in-memory cache for date: " + dateKey + ", type: "
+                                        + pair.plannedMeal.getType());
+
+                                // Save meal to favorites (if not already)
+                                return mealDao.insertMeal(pair.meal)
+                                        .doOnComplete(
+                                                () -> System.out.println("[SYNC] Saved meal: " + pair.meal.getName()))
+                                        .andThen(plannedMealDao.insertPlannedMeal(
+                                                new com.example.mealplanner.model.PlannedMeal(
+                                                        pair.meal.getId(),
+                                                        pair.plannedMeal.getDate(),
+                                                        pair.plannedMeal.getType())))
+                                        .doOnComplete(() -> System.out.println("[SYNC] Saved planned meal entry"))
+                                        .doOnError(error -> System.err.println(
+                                                "[SYNC ERROR] Failed to save planned meal: " + error.getMessage()));
+                            });
+                })
+                .doOnComplete(() -> System.out.println("[SYNC] syncPlannedMealsFromFirestore completed successfully"))
+                .doOnError(error -> System.err
+                        .println("[SYNC ERROR] syncPlannedMealsFromFirestore failed: " + error.getMessage()));
+    }
+
+    @Override
+    public Completable clearAllUserData() {
+        // Clear in-memory cache
+        plannedMeals.clear();
+
+        // Clear Room database
+        return mealDao.deleteAllMeals()
+                .andThen(plannedMealDao.deleteAllPlannedMeals())
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io());
+    }
+}
+
+// Helper class for pairing Meal with PlannedMealFirestore
+class MealPlannedPair {
+    Meal meal;
+    com.example.mealplanner.datasource.firestore.PlannedMealFirestore plannedMeal;
 }

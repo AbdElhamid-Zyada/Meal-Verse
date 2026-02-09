@@ -113,16 +113,15 @@ public class SavedMealsFragment extends Fragment implements SavedMealsContract.V
             Meal meal = meals.get(position);
             holder.tvName.setText(meal.getName());
 
-            // Format info (assuming we have category/area if available, or just mocking)
-            // For now using the mock info style
-            // Assuming Meal class has getters if updated, but current model from before:
-            // id, name, imageResId, calories, preparationTimeMinutes, type
-            // It doesn't have area/category fields yet unless I add them.
-            // I'll stick to what we have or add hardcoded placeholders for visuals as per
-            // previous mock data.
-            holder.tvInfo.setText(meal.getCalories() + " kcal • " + meal.getPreparationTimeMinutes() + " mins");
+            // Display category and area
+            holder.tvInfo.setText(meal.getCategory() + " • " + meal.getArea());
 
-            holder.ivImage.setImageResource(meal.getImageResId());
+            // Load image using Glide
+            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(meal.getImageUrl())
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
+                    .into(holder.ivImage);
 
             // Heart is filled
             holder.ivFavorite.setImageResource(R.drawable.ic_favorite);

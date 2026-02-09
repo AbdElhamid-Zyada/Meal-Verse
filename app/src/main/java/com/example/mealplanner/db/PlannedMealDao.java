@@ -30,4 +30,7 @@ public interface PlannedMealDao {
     // Deletion by specific criteria
     @Query("DELETE FROM planned_meals WHERE date = :date AND type = :type")
     Completable deletePlannedMeal(java.util.Date date, com.example.mealplanner.model.MealType type);
+
+    @Query("DELETE FROM planned_meals")
+    Completable deleteAllPlannedMeals();
 }
