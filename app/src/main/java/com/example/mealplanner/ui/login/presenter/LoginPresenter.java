@@ -95,7 +95,8 @@ public class LoginPresenter implements LoginContract.Presenter {
 
     @Override
     public void onGuestClicked(View view) {
-        disposables.add(userRepository.saveGuestMode(true)
+        disposables.add(mealRepository.clearAllUserData()
+                .andThen(userRepository.saveGuestMode(true))
                 .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
                 .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
                 .subscribe(
