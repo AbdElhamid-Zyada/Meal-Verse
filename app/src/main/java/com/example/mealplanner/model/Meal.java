@@ -18,8 +18,7 @@ public class Meal implements Serializable {
     private String area;
     private java.util.List<String> ingredients;
     private MealType type;
-    @androidx.room.Ignore
-    private boolean isFavorite;
+    private boolean isFavorite; // Now stored in Room to distinguish favorites from cache
 
     // Room needs a no-arg constructor if other constructors don't match perfectly
     public Meal() {

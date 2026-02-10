@@ -26,7 +26,6 @@ public class MealPlannerGlideModule extends AppGlideModule {
 
     @Override
     public void registerComponents(Context context, Glide glide, Registry registry) {
-        // Can register custom components here if needed
     }
 
     @Override

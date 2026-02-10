@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.core.Single;
 @Dao
 public interface MealDao {
 
-    @Query("SELECT * FROM meals")
+    @Query("SELECT * FROM meals WHERE isFavorite = 1")
     Observable<List<Meal>> getAllMeals();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -26,7 +26,7 @@ public interface MealDao {
     @Delete
     Completable deleteMeal(Meal meal);
 
-    @Query("SELECT EXISTS(SELECT 1 FROM meals WHERE id = :id)")
+    @Query("SELECT EXISTS(SELECT 1 FROM meals WHERE id = :id AND isFavorite = 1)")
     Single<Boolean> isFavorite(String id);
 
     @Query("SELECT * FROM meals WHERE id = :mealId LIMIT 1")
